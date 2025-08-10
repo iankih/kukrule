@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
 
     // Supabase Storage에 업로드
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('product-images')
       .upload(fileName, file, {
         cacheControl: '3600',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ToastProps {
@@ -21,12 +21,12 @@ export function Toast({
   const [isVisible, setIsVisible] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true)
     setTimeout(() => {
       onClose()
     }, 300) // Animation duration
-  }
+  }, [onClose])
 
   useEffect(() => {
     // Show animation

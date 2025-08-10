@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -14,7 +15,7 @@ interface ProductFormData {
   description: string
   category_id: string
   price: string
-  thumbnail_url: string
+  images: string[]
   coupang_link: string
   naver_link: string
 }
@@ -35,7 +36,7 @@ export default function ProductsManager() {
     description: '',
     category_id: '',
     price: '',
-    thumbnail_url: '',
+    images: [],
     coupang_link: '',
     naver_link: ''
   })
@@ -77,7 +78,8 @@ export default function ProductsManager() {
         description: formData.description || undefined,
         category_id: formData.category_id,
         price: formData.price ? parseFloat(formData.price) : undefined,
-        thumbnail_url: formData.thumbnail_url || undefined,
+        thumbnail_url: formData.images.length > 0 ? formData.images[0] : undefined,
+        images: formData.images,
         coupang_link: formData.coupang_link || undefined,
         naver_link: formData.naver_link || undefined
       }
@@ -104,12 +106,18 @@ export default function ProductsManager() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
+    // 기존 데이터에서 이미지 배열 구성 (thumbnail_url이 첫 번째가 아니라면 추가)
+    const existingImages = product.images || []
+    const allImages = product.thumbnail_url 
+      ? (existingImages.includes(product.thumbnail_url) ? existingImages : [product.thumbnail_url, ...existingImages])
+      : existingImages
+    
     setFormData({
       title: product.title,
       description: product.description || '',
       category_id: product.category_id,
       price: product.price?.toString() || '',
-      thumbnail_url: product.thumbnail_url || '',
+      images: allImages,
       coupang_link: product.coupang_link || '',
       naver_link: product.naver_link || ''
     })
@@ -134,37 +142,65 @@ export default function ProductsManager() {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleProductImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
     try {
       setUploadingImage(true)
-      
-      const formData = new FormData()
-      formData.append('file', file)
+      const uploadPromises = []
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', file)
 
-      const data = await response.json()
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '이미지 업로드에 실패했습니다.')
+        uploadPromises.push(
+          fetch('/api/upload', {
+            method: 'POST',
+            body: uploadFormData
+          }).then(response => response.json())
+        )
       }
 
-      // 업로드된 이미지 URL을 폼에 설정
-      setFormData(prev => ({ ...prev, thumbnail_url: data.data.url }))
-      alert('이미지가 업로드되었습니다.')
+      const results = await Promise.all(uploadPromises)
+      const uploadedUrls: string[] = []
+
+      for (const result of results) {
+        if (result.success) {
+          uploadedUrls.push(result.data.url)
+        } else {
+          console.error('Upload failed:', result.error)
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls]
+        }))
+        alert(`${uploadedUrls.length}개의 제품 이미지가 업로드되었습니다.`)
+      } else {
+        alert('이미지 업로드에 실패했습니다.')
+      }
 
     } catch (error) {
-      console.error('Image upload error:', error)
-      alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.')
+      console.error('Product image upload error:', error)
+      alert('이미지 업로드 중 오류가 발생했습니다.')
     } finally {
       setUploadingImage(false)
+      // 파일 입력 초기화
+      if (e.target) {
+        e.target.value = ''
+      }
     }
+  }
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }))
   }
 
   const resetForm = () => {
@@ -173,7 +209,7 @@ export default function ProductsManager() {
       description: '',
       category_id: '',
       price: '',
-      thumbnail_url: '',
+      images: [],
       coupang_link: '',
       naver_link: ''
     })
@@ -282,45 +318,62 @@ export default function ProductsManager() {
                     />
                   </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      썸네일 이미지
+                      제품 이미지
                     </label>
-                    <div className="space-y-2">
-                      {/* 이미지 업로드 */}
-                      <div className="flex items-center space-x-2">
+                    <div className="space-y-4">
+                      {/* 제품 이미지 업로드 */}
+                      <div>
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageUpload}
+                          multiple
+                          onChange={handleProductImagesUpload}
                           disabled={isSubmitting || uploadingImage}
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
                         />
+                        <p className="text-xs text-gray-500 mt-1">여러 이미지를 한번에 선택할 수 있습니다. 첫 번째 이미지가 썸네일로 사용됩니다.</p>
                         {uploadingImage && (
-                          <div className="text-sm text-gray-500">업로드 중...</div>
+                          <div className="text-sm text-gray-500 mt-2">업로드 중...</div>
                         )}
                       </div>
-                      
-                      {/* 또는 URL 직접 입력 */}
-                      <div>
-                        <input
-                          type="url"
-                          value={formData.thumbnail_url}
-                          onChange={(e) => setFormData(prev => ({ ...prev, thumbnail_url: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
-                          placeholder="또는 이미지 URL을 직접 입력하세요"
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                      
-                      {/* 이미지 미리보기 */}
-                      {formData.thumbnail_url && (
-                        <div className="mt-2">
-                          <img
-                            src={formData.thumbnail_url}
-                            alt="미리보기"
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                          />
+
+                      {/* 업로드된 제품 이미지들 미리보기 */}
+                      {formData.images.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">
+                            제품 이미지 ({formData.images.length}개) {formData.images.length > 0 && <span className="text-xs text-teal-600">• 첫 번째 이미지가 썸네일입니다</span>}
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            {formData.images.map((imageUrl, index) => (
+                              <div key={index} className="relative group">
+                                <div className={`relative ${index === 0 ? 'ring-2 ring-teal-400' : ''}`}>
+                                  <Image
+                                    src={imageUrl}
+                                    alt={`제품 이미지 ${index + 1}`}
+                                    width={96}
+                                    height={96}
+                                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                  />
+                                  {index === 0 && (
+                                    <div className="absolute -top-1 -left-1 bg-teal-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                                      썸네일
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  disabled={isSubmitting}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="이미지 삭제"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -426,10 +479,12 @@ export default function ProductsManager() {
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-12 w-12">
                             {product.thumbnail_url ? (
-                              <img
+                              <Image
                                 className="h-12 w-12 rounded-lg object-cover"
                                 src={product.thumbnail_url}
                                 alt={product.title}
+                                width={48}
+                                height={48}
                               />
                             ) : (
                               <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">

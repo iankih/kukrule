@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     // 로그아웃 - 쿠키 삭제
     const cookieStore = await cookies()

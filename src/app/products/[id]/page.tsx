@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -17,8 +18,12 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isCommentsLoading, setIsCommentsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  
+  // 이미지 갤러리 상태
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isImageGalleryOpen, setIsImageGalleryOpen] = useState(false)
   
   // 댓글 작성 폼 상태
   const [isCommentFormOpen, setIsCommentFormOpen] = useState(false)
@@ -64,6 +69,20 @@ export default function ProductDetailPage() {
     }
   }, [productId])
 
+  // Scroll to top functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // 댓글 작성
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,7 +95,7 @@ export default function ProductDetailPage() {
     try {
       setIsSubmitting(true)
       
-      const newComment = await createComment({
+      await createComment({
         product_id: productId,
         author: commentForm.author.trim(),
         content: commentForm.content.trim(),
@@ -156,38 +175,135 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
       <div className="w-full max-w-[600px] min-w-[320px] bg-white min-h-screen shadow-xl">
-        {/* 헤더 */}
-        <div className="bg-white sticky top-0 z-50 border-b border-gray-200">
+        {/* Top bar - not sticky */}
+        <div className="bg-white">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              <button 
-                onClick={() => router.back()}
-                className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={() => router.push('/home')}
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-6 h-6 text-teal-400">
+                    ✨
+                  </div>
+                  <span className="text-lg font-bold text-[#19D7D2]">kukrule</span>
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button className="flex items-center space-x-1 text-sm text-gray-600">
+                  <span>🌐</span>
+                  <span>한국어</span>
+                  <span className="text-xs">▼</span>
+                </button>
+                <button className="text-gray-600">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Fixed Search Header */}
+        <header className="bg-white sticky top-0 z-50">
+          {/* Search bar */}
+          <div className="px-4 py-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="궁금한 국민 아이템을 검색해 보세요"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-              <h1 className="text-lg font-semibold text-gray-900 truncate mx-4">제품 상세</h1>
-              <div className="w-8 h-8"></div>
             </div>
+          </div>
+        </header>
+
+        {/* Navigation with Back Button */}
+        <div className="bg-white px-4">
+          <div className="flex items-center space-x-4 border-b border-gray-200 pb-2">
+            <button 
+              onClick={() => router.back()}
+              className="flex items-center space-x-1 text-gray-600 hover:text-gray-800"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="text-sm font-medium">이전</span>
+            </button>
+            <div className="h-4 w-px bg-gray-300"></div>
+            <span className="text-sm font-medium text-teal-500">제품 상세</span>
           </div>
         </div>
 
         {/* 제품 정보 */}
         <div className="p-4">
           <Card variant="base" className="mb-6">
-            {/* 제품 사진 */}
-            <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden mb-4">
-              {product.thumbnail_url ? (
-                <img 
-                  src={product.thumbnail_url} 
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-gray-400">제품 이미지</span>
-              )}
+            {/* 제품 이미지 갤러리 */}
+            <div className="mb-4">
+              {/* 메인 이미지 */}
+              <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden mb-3 relative group cursor-pointer" onClick={() => setIsImageGalleryOpen(true)}>
+                {(() => {
+                  const allImages = (product.images && product.images.length > 0) ? product.images : (product.thumbnail_url ? [product.thumbnail_url] : [])
+                  const currentImage = allImages[currentImageIndex]
+                  
+                  if (!currentImage) {
+                    return <span className="text-gray-400">제품 이미지</span>
+                  }
+                  
+                  return (
+                    <>
+                      <Image 
+                        src={currentImage} 
+                        alt={`${product.title} - 이미지 ${currentImageIndex + 1}`}
+                        width={600}
+                        height={256}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      
+                      {/* 좌우 화살표 버튼 */}
+                      {allImages.length > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCurrentImageIndex(prev => prev === 0 ? allImages.length - 1 : prev - 1)
+                            }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCurrentImageIndex(prev => prev === allImages.length - 1 ? 0 : prev + 1)
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                          
+                          {/* 이미지 카운터 */}
+                          <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs font-medium">
+                            {currentImageIndex + 1} / {allImages.length}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )
+                })()
+                }
+              </div>
             </div>
             
             {/* 제조사 아이콘 / 이름 */}
@@ -409,6 +525,106 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+        
+        {/* 이미지 갤러리 모달 */}
+        {isImageGalleryOpen && (() => {
+          const allImages = (product.images && product.images.length > 0) ? product.images : (product.thumbnail_url ? [product.thumbnail_url] : [])
+          if (allImages.length === 0) return null
+          
+          return (
+            <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+              <div className="relative max-w-4xl max-h-full w-full h-full flex flex-col">
+                {/* 헤더 */}
+                <div className="flex items-center justify-between p-4 text-white">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="text-lg font-semibold">{product.title}</h3>
+                    <span className="text-sm text-gray-300">{currentImageIndex + 1} / {allImages.length}</span>
+                  </div>
+                  <button
+                    onClick={() => setIsImageGalleryOpen(false)}
+                    className="text-white hover:text-gray-300 transition-colors"
+                  >
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* 메인 이미지 */}
+                <div className="flex-1 flex items-center justify-center p-4 relative">
+                  <Image
+                    src={allImages[currentImageIndex]}
+                    alt={`${product.title} - 이미지 ${currentImageIndex + 1}`}
+                    width={800}
+                    height={600}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                  
+                  {/* 이전/다음 버튼 */}
+                  {allImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === 0 ? allImages.length - 1 : prev - 1)}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === allImages.length - 1 ? 0 : prev + 1)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                {/* 하단 썸네일 네비게이션 */}
+                {allImages.length > 1 && (
+                  <div className="p-4">
+                    <div className="flex justify-center space-x-2 overflow-x-auto">
+                      {allImages.map((imageUrl, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                            currentImageIndex === index 
+                              ? 'border-teal-400 ring-2 ring-teal-300' 
+                              : 'border-gray-600 hover:border-gray-400'
+                          }`}
+                        >
+                          <Image
+                            src={imageUrl}
+                            alt={`제품 이미지 ${index + 1}`}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+        
+        {/* Scroll to top button */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-40"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   )

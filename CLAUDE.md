@@ -132,3 +132,138 @@ src/components/
 * 현재 모든 텍스트가 한국어로 하드코딩
 * 언어 전환 UI는 존재하나 기능 미구현
 * 프로덕션 배포 전 i18n 적용 검토 필요
+
+## Supabase 백엔드 및 데이터베이스
+
+### 데이터베이스 구조
+
+현재 프로젝트는 Supabase PostgreSQL을 사용하며 다음과 같은 테이블 구조를 가지고 있습니다:
+
+```sql
+-- 카테고리 테이블
+categories (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name text NOT NULL,
+  created_at timestamptz DEFAULT now()
+)
+
+-- 제품 테이블
+products (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title text NOT NULL,
+  description text,
+  category_id uuid REFERENCES categories(id),
+  price integer,
+  thumbnail_url text,
+  coupang_link text,
+  naver_link text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+)
+
+-- 댓글 테이블
+comments (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_id uuid REFERENCES products(id),
+  author text NOT NULL,
+  content text NOT NULL,
+  password_hash text NOT NULL,
+  created_at timestamptz DEFAULT now()
+)
+
+-- 캐러셀 관리 테이블
+carousel_items (
+  id serial PRIMARY KEY,
+  title text NOT NULL,
+  subtitle text,
+  color text DEFAULT 'teal',
+  image text,
+  "order" integer DEFAULT 1,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+)
+```
+
+### API 구조
+
+프로젝트는 Next.js API Routes를 사용하여 RESTful API를 구현합니다:
+
+```
+/api/
+├── products/
+│   ├── GET     # 제품 목록 조회
+│   ├── POST    # 제품 생성 (관리자)
+│   └── [id]/
+│       ├── GET    # 개별 제품 조회
+│       ├── PUT    # 제품 수정 (관리자)
+│       └── DELETE # 제품 삭제 (관리자)
+├── comments/
+│   ├── [productId]/
+│   │   └── GET # 특정 제품 댓글 조회
+│   ├── POST    # 댓글 생성
+│   └── [id]/
+│       └── DELETE # 댓글 삭제
+├── carousel/
+│   ├── GET     # 캐러셀 데이터 조회
+│   └── PUT     # 캐러셀 데이터 업데이트 (관리자)
+├── upload/
+│   └── POST    # 이미지 업로드 (관리자)
+├── admin/
+│   ├── auth/
+│   │   └── POST # 관리자 인증
+│   └── comments/
+│       └── DELETE # 관리자 댓글 삭제
+└── setup-carousel/
+    └── POST    # 캐러셀 테이블 초기 설정
+```
+
+## MCP (Model Context Protocol) 연동
+
+### Supabase MCP 기능
+
+프로젝트는 **Supabase MCP**를 활용하여 데이터베이스 작업을 효율적으로 수행합니다.
+
+#### 주요 기능
+
+* **직접 SQL 실행**: `mcp__supabase__execute_sql` 도구를 통한 데이터 조회 및 조작
+* **스키마 마이그레이션**: `mcp__supabase__apply_migration` 도구를 통한 데이터베이스 스키마 변경
+* **테이블 관리**: `mcp__supabase__list_tables` 도구를 통한 테이블 구조 확인
+
+#### 실제 적용 사례
+
+**캐러셀 관리 시스템 구현**:
+```sql
+-- MCP를 통해 실행된 carousel_items 테이블 생성
+CREATE TABLE carousel_items (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  color TEXT DEFAULT 'teal',
+  image TEXT,
+  "order" INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 기본 데이터 삽입
+INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_active) VALUES
+(1, '오직, 국룰에서만 만나볼 수 있어요\\n특별한 국민 아이템', '브랜드데이 특가', 'teal', null, 1, true),
+(2, '트렌드를 앞서가는\\n뷰티 아이템 모음', '신상품 출시', 'purple', null, 2, true),
+(3, '검증된 품질의\\n베스트 셀러 상품', '인기 상품 모음', 'orange', null, 3, true);
+```
+
+#### MCP 활용의 장점
+
+1. **개발 효율성**: API 구현 없이 직접 데이터베이스 작업 수행
+2. **빠른 프로토타이핑**: 스키마 변경과 데이터 조작을 즉시 실행
+3. **안전한 마이그레이션**: 구조화된 SQL 명령으로 데이터베이스 업데이트
+4. **실시간 디버깅**: 직접 데이터 확인 및 수정 가능
+
+### MCP 사용 모범 사례
+
+1. **테이블 생성**: 항상 `apply_migration`으로 스키마 변경 기록
+2. **데이터 조회**: `execute_sql`로 복잡한 쿼리 실행
+3. **백업 전략**: 중요한 변경 전 데이터 백업 확인
+4. **에러 처리**: MCP 실행 실패 시 대체 방안 준비

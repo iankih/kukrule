@@ -19,6 +19,7 @@ export interface Product {
   category_id: string
   price: number | null
   thumbnail_url: string | null
+  images: string[] | null // 추가 이미지들 (JSON 배열)
   coupang_link: string | null
   naver_link: string | null
   created_at: string

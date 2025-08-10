@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const categoryId = searchParams.get('category_id')
+    const search = searchParams.get('search')
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = parseInt(searchParams.get('offset') || '0')
 
@@ -18,8 +19,18 @@ export async function GET(request: NextRequest) {
           name
         )
       `)
-      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
+
+    // 검색 기능
+    if (search) {
+      // title 또는 description에서 검색어 찾기 (대소문자 구분 없음)
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+      // 검색 시에는 관련도 순으로 정렬하기 위해 created_at 순으로 먼저 정렬
+      query = query.order('created_at', { ascending: false })
+    } else {
+      // 검색이 없으면 기본 최신순 정렬
+      query = query.order('created_at', { ascending: false })
+    }
 
     // 카테고리 필터링
     if (categoryId) {
@@ -58,7 +69,7 @@ export async function POST(request: NextRequest) {
     await requireAdminAuth()
 
     const body = await request.json()
-    const { title, description, category_id, price, thumbnail_url, coupang_link, naver_link } = body
+    const { title, description, category_id, price, thumbnail_url, images, coupang_link, naver_link } = body
     
     // 필수 필드 검증
     if (!title || !category_id) {
@@ -74,6 +85,7 @@ export async function POST(request: NextRequest) {
       category_id,
       price: price ? parseFloat(price) : null,
       thumbnail_url,
+      images: images || [],
       coupang_link,
       naver_link
     }

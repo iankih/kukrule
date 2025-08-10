@@ -18,12 +18,14 @@ interface ApiResponse<T> {
 // Products API
 export async function getProducts(params: {
   categoryId?: string
+  search?: string
   limit?: number
   offset?: number
 } = {}) {
   const searchParams = new URLSearchParams()
   
   if (params.categoryId) searchParams.set('category_id', params.categoryId)
+  if (params.search) searchParams.set('search', params.search)
   if (params.limit) searchParams.set('limit', params.limit.toString())
   if (params.offset) searchParams.set('offset', params.offset.toString())
   
@@ -123,6 +125,7 @@ export async function createProduct(productData: {
   category_id: string
   price?: number
   thumbnail_url?: string
+  images?: string[]
   coupang_link?: string
   naver_link?: string
 }) {
@@ -149,6 +152,7 @@ export async function updateProduct(productId: string, productData: {
   category_id: string
   price?: number
   thumbnail_url?: string
+  images?: string[]
   coupang_link?: string
   naver_link?: string
 }) {

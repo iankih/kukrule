@@ -1,44 +1,56 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
+import { getCarouselTheme } from '@/lib/carousel-theme'
 
 export default function HomePage() {
   const router = useRouter()
-  const [language, setLanguage] = useState('한국어')
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [scrollLeft, setScrollLeft] = useState(0)
+  const autoSlideRef = useRef<NodeJS.Timeout | null>(null) // 자동 슬라이드 타이머
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null) // 검색 디바운싱 타이머
+  
+  // 검색 관련 상태
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Product[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [isSearchMode, setIsSearchMode] = useState(false)
 
-  const carouselItems = [
+  // 캐러셀 아이템을 상태로 관리
+  const [carouselItems, setCarouselItems] = useState([
     {
+      id: 1,
       title: '오직, 국룰에서만 만나볼 수 있어요\n특별한 국민 아이템',
       subtitle: '브랜드데이 특가',
-      color: 'teal'
+      color: 'teal',
+      image: null
     },
     {
+      id: 2,
       title: '트렌드를 앞서가는\n뷰티 아이템 모음',
       subtitle: '신상품 출시',
-      color: 'purple'
+      color: 'purple',
+      image: null
     },
     {
+      id: 3,
       title: '검증된 품질의\n베스트 셀러 상품',
       subtitle: '인기 상품 모음',
-      color: 'orange'
+      color: 'orange',
+      image: null
     }
-  ]
+  ])
 
   // Fetch data from API
   useEffect(() => {
@@ -71,52 +83,144 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // 캐러셀 데이터 로드 및 업데이트 이벤트 리스너
+  useEffect(() => {
+    // 데이터베이스에서 캐러셀 데이터 불러오기
+    const loadCarouselData = async () => {
+      try {
+        const response = await fetch('/api/carousel')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data.length > 0) {
+            setCarouselItems(data.data)
+            // 로컬 스토리지에도 백업 저장
+            localStorage.setItem('carousel-items', JSON.stringify(data.data))
+            return
+          }
+        }
+        
+        // 데이터베이스에서 불러오지 못한 경우, 로컬 스토리지 확인
+        const savedCarouselData = localStorage.getItem('carousel-items')
+        if (savedCarouselData) {
+          const parsedData = JSON.parse(savedCarouselData)
+          setCarouselItems(parsedData)
+        }
+      } catch (error) {
+        console.error('캐러셀 데이터 로드 실패:', error)
+        // 에러 발생 시 로컬 스토리지에서 로드 시도
+        try {
+          const savedCarouselData = localStorage.getItem('carousel-items')
+          if (savedCarouselData) {
+            const parsedData = JSON.parse(savedCarouselData)
+            setCarouselItems(parsedData)
+          }
+        } catch (localError) {
+          console.error('로컬 캐러셀 데이터 로드도 실패:', localError)
+        }
+      }
+    }
+
+    // 초기 로드
+    loadCarouselData()
+
+    // 캐러셀 업데이트 이벤트 리스너
+    const handleCarouselUpdate = (event: CustomEvent) => {
+      setCarouselItems(event.detail)
+    }
+
+    window.addEventListener('carousel-updated', handleCarouselUpdate as EventListener)
+
+    return () => {
+      window.removeEventListener('carousel-updated', handleCarouselUpdate as EventListener)
+    }
+  }, [])
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    setStartX(e.pageX)
-    setScrollLeft(currentSlide * 100)
+  // 검색 함수
+  const performSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      setIsSearchMode(false)
+      return
+    }
+
+    try {
+      setIsSearching(true)
+      setIsSearchMode(true)
+      const results = await getProducts({ search: query, limit: 20 })
+      setSearchResults(results)
+    } catch (error) {
+      console.error('검색 오류:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
-    e.preventDefault()
-    const x = e.pageX
-    const walk = (x - startX) * 0.5 // 드래그 감도
-    const newScrollLeft = scrollLeft - walk
-    const slideWidth = 100
-    const newSlideIndex = Math.round(newScrollLeft / slideWidth)
-    const clampedIndex = Math.max(0, Math.min(carouselItems.length - 1, newSlideIndex))
-    setCurrentSlide(clampedIndex)
+  // 검색어 입력 핸들러
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value
+    setSearchQuery(query)
   }
 
-  const handleMouseUp = () => {
-    setIsDragging(false)
+  // 검색창 클리어
+  const clearSearch = () => {
+    setSearchQuery('')
+    setSearchResults([])
+    setIsSearchMode(false)
+    // 검색 타이머도 정리
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
   }
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true)
-    setStartX(e.touches[0].pageX)
-    setScrollLeft(currentSlide * 100)
-  }
+  // 디바운싱된 검색 실행
+  useEffect(() => {
+    // 기존 타이머 정리
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return
-    const x = e.touches[0].pageX
-    const walk = (x - startX) * 0.5
-    const newScrollLeft = scrollLeft - walk
-    const slideWidth = 100
-    const newSlideIndex = Math.round(newScrollLeft / slideWidth)
-    const clampedIndex = Math.max(0, Math.min(carouselItems.length - 1, newSlideIndex))
-    setCurrentSlide(clampedIndex)
-  }
+    // 검색어가 있으면 500ms 후에 검색 실행
+    if (searchQuery.trim()) {
+      searchTimeoutRef.current = setTimeout(() => {
+        performSearch(searchQuery.trim())
+      }, 500)
+    } else {
+      // 검색어가 없으면 즉시 검색 모드 해제
+      setSearchResults([])
+      setIsSearchMode(false)
+      setIsSearching(false)
+    }
 
-  const handleTouchEnd = () => {
-    setIsDragging(false)
-  }
+    // 클린업 함수
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchQuery])
+
+
+  // 자동 슬라이드 초기화 및 정리
+  useEffect(() => {
+    // 직접 타이머 설정
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % carouselItems.length)
+    }, 3000)
+    
+    autoSlideRef.current = timer
+    
+    return () => {
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current)
+      }
+    }
+  }, [carouselItems.length])
+
 
   if (isLoading) {
     return (
@@ -163,7 +267,7 @@ export default function HomePage() {
               <div className="flex items-center space-x-3">
                 <button className="flex items-center space-x-1 text-sm text-gray-600">
                   <span>🌐</span>
-                  <span>{language}</span>
+                  <span>한국어</span>
                   <span className="text-xs">▼</span>
                 </button>
                 <button className="text-gray-600">
@@ -183,14 +287,27 @@ export default function HomePage() {
             <div className="relative">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={handleSearchInput}
                 placeholder="궁금한 국민 아이템을 검색해 보세요"
                 className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
+              {searchQuery ? (
+                <button 
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : (
+                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -205,63 +322,196 @@ export default function HomePage() {
 
         {/* Main content */}
         <main>
-          {/* Main Carousel Slider */}
-          <div className="px-4 pt-4 pb-6">
-            <div className="relative overflow-hidden rounded-2xl">
-              {/* Carousel Container */}
-              <div 
-                className="relative cursor-grab select-none"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-              >
-                <div 
-                  className="flex transition-transform duration-300 ease-in-out"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                >
-                  {carouselItems.map((item, index) => (
-                    <div key={index} className="w-full flex-shrink-0">
-                      <div className={`bg-gradient-to-r from-${item.color}-100 via-${item.color}-50 to-${item.color}-100 p-8`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h2 className="text-xl font-bold text-gray-900 mb-3 leading-tight whitespace-pre-line">
-                              {item.title}
-                            </h2>
-                            <p className="text-base text-gray-600">
-                              {item.subtitle}
-                            </p>
-                          </div>
-                          <div className="flex-shrink-0 ml-6">
-                            <div className="w-24 h-32 rounded-lg flex items-center justify-center">
-                              <span className="text-sm text-gray-400">제품</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+          {/* 검색 결과 섹션 */}
+          {isSearchMode && (
+            <div className="px-4 pt-4">
+              <div className="mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      '{searchQuery}' 검색 결과
+                    </h2>
+                    {!isSearching && (
+                      <p className="text-sm text-gray-500">
+                        {searchResults.length}개의 제품을 찾았습니다
+                      </p>
+                    )}
+                  </div>
+                  {isSearching && (
+                    <div className="flex items-center space-x-2">
+                      <Spinner size="sm" />
+                      <span className="text-sm text-gray-500">검색 중...</span>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
-              {/* Slide Indicators */}
-              <div className="flex justify-center mt-4 space-x-2">
-                {carouselItems.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentSlide ? 'bg-teal-400' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
+              {/* 검색 결과 목록 */}
+              {isSearching ? (
+                <div className="flex justify-center py-12">
+                  <div className="flex flex-col items-center space-y-4">
+                    <Spinner size="lg" />
+                    <p className="text-gray-600">검색 중입니다...</p>
+                  </div>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="space-y-3 mb-8">
+                  {searchResults.map((product, index) => (
+                    <Card 
+                      key={product.id} 
+                      variant="base" 
+                      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => router.push(`/products/${product.id}`)}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {(() => {
+                            // 첫 번째 이미지를 썸네일로 사용 (새로운 방식)
+                            const thumbnailUrl = (product.images && product.images.length > 0) 
+                              ? product.images[0] 
+                              : product.thumbnail_url
+                            
+                            return thumbnailUrl ? (
+                              <Image 
+                                src={thumbnailUrl} 
+                                alt={product.title}
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-sm">제품</span>
+                            )
+                          })()
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2" style={{ color: '#111827' }}>
+                            {product.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-2">
+                            {product.categories?.name || '카테고리'}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center">
+                                <span className="text-yellow-400 text-sm">⭐</span>
+                                <span className="text-sm font-medium ml-1">4.{8 - (index % 5)}</span>
+                              </div>
+                              <span className="text-xs text-gray-400">({(1000 + index * 100).toLocaleString()})</span>
+                            </div>
+                            {product.price && (
+                              <span className="text-lg font-bold text-teal-600">
+                                ₩{product.price.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
+                  <p className="text-gray-500 mb-4">
+                    '{searchQuery}'와 관련된 제품을 찾을 수 없습니다.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSearch}
+                  >
+                    검색 초기화
+                  </Button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* 검색 모드가 아닐 때만 기존 콘텐츠 표시 */}
+          {!isSearchMode && (
+            <>
+              {/* Main Carousel Slider */}
+              <div className="px-4 pt-4 pb-6">
+                <div className="relative overflow-hidden rounded-2xl">
+                  {/* Carousel Container */}
+                  <div className="relative">
+                    <div 
+                      className="flex transition-transform duration-300 ease-in-out"
+                      style={{ 
+                        transform: `translateX(-${currentSlide * 102}%)`, // 102%로 캐러셀 간 간격 추가
+                        gap: '8px' // 캐러셀 사이 간격
+                      }}
+                    >
+                      {carouselItems.map((item, index) => {
+                        const themeColors = getCarouselTheme(item.color)
+                        return (
+                          <div key={index} className="w-full flex-shrink-0">
+                            <div 
+                              className="p-8"
+                              style={{ 
+                                background: themeColors.gradient,
+                                borderRadius: '16px'
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <h2 
+                                    className="text-xl font-bold mb-3 leading-tight whitespace-pre-line"
+                                    style={{ color: themeColors.textColor }}
+                                  >
+                                    {item.title}
+                                  </h2>
+                                  <p 
+                                    className="text-base"
+                                    style={{ color: themeColors.subtitleColor }}
+                                  >
+                                    {item.subtitle}
+                                  </p>
+                                </div>
+                                <div className="flex-shrink-0 ml-6">
+                                  <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
+                                    {item.image ? (
+                                      <Image 
+                                        src={item.image} 
+                                        alt={`캐러셀 ${item.id} 이미지`}
+                                        width={96}
+                                        height={128}
+                                        className="w-full h-full object-contain"
+                                      />
+                                    ) : (
+                                      <span className="text-sm text-gray-400">제품</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Slide Indicators */}
+                  <div className="flex justify-center mt-4 space-x-2">
+                    {carouselItems.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentSlide(index)}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          index === currentSlide ? 'bg-teal-400' : 'bg-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
 
 
           {/* Rising Ranking Section */}
@@ -292,9 +542,11 @@ export default function HomePage() {
                   <div className="relative">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                       {products[0].thumbnail_url ? (
-                        <img 
+                        <Image 
                           src={products[0].thumbnail_url} 
                           alt={products[0].title}
+                          width={80}
+                          height={80}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -338,15 +590,24 @@ export default function HomePage() {
                       {rank}
                     </div>
                     <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {product.thumbnail_url ? (
-                        <img 
-                          src={product.thumbnail_url} 
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-400">제품</span>
-                      )}
+                      {(() => {
+                        const thumbnailUrl = (product.images && product.images.length > 0) 
+                          ? product.images[0] 
+                          : product.thumbnail_url
+                        
+                        return thumbnailUrl ? (
+                          <Image 
+                            src={thumbnailUrl} 
+                            alt={product.title}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-400">제품</span>
+                        )
+                      })()
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="text-sm font-medium text-gray-900 truncate">{product.title}</h5>
@@ -418,7 +679,6 @@ export default function HomePage() {
             {/* Skin type products */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               {products.slice(0, 6).map((product, index) => {
-                const rank = index + 1
                 const rating = 4.8 - index * 0.1
                 const reviews = 1200 + index * 100
                 
@@ -428,15 +688,24 @@ export default function HomePage() {
                       <span className="text-xs text-yellow-600">🏆</span>
                     </div>
                     <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {product.thumbnail_url ? (
-                        <img 
-                          src={product.thumbnail_url} 
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-400">제품</span>
-                      )}
+                      {(() => {
+                        const thumbnailUrl = (product.images && product.images.length > 0) 
+                          ? product.images[0] 
+                          : product.thumbnail_url
+                        
+                        return thumbnailUrl ? (
+                          <Image 
+                            src={thumbnailUrl} 
+                            alt={product.title}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-400">제품</span>
+                        )
+                      })()
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="text-sm font-medium text-gray-900 truncate">
@@ -491,15 +760,24 @@ export default function HomePage() {
                       <span className="text-xs font-bold text-blue-600">{rank}</span>
                     </div>
                     <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {product.thumbnail_url ? (
-                        <img 
-                          src={product.thumbnail_url} 
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-400">제품</span>
-                      )}
+                      {(() => {
+                        const thumbnailUrl = (product.images && product.images.length > 0) 
+                          ? product.images[0] 
+                          : product.thumbnail_url
+                        
+                        return thumbnailUrl ? (
+                          <Image 
+                            src={thumbnailUrl} 
+                            alt={product.title}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-400">제품</span>
+                        )
+                      })()
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="text-sm font-medium text-gray-900 truncate">
@@ -548,15 +826,24 @@ export default function HomePage() {
                       {categoryProducts.length > 0 ? (
                         categoryProducts.map((product) => (
                           <div key={product.id} className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {product.thumbnail_url ? (
-                              <img 
-                                src={product.thumbnail_url} 
-                                alt={product.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-400">제품</span>
-                            )}
+                            {(() => {
+                              const thumbnailUrl = (product.images && product.images.length > 0) 
+                                ? product.images[0] 
+                                : product.thumbnail_url
+                              
+                              return thumbnailUrl ? (
+                                <Image 
+                                  src={thumbnailUrl} 
+                                  alt={product.title}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-400">제품</span>
+                              )
+                            })()
+                            }
                           </div>
                         ))
                       ) : (
@@ -578,8 +865,10 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Bottom spacing */}
-          <div className="h-20"></div>
+              {/* Bottom spacing */}
+              <div className="h-20"></div>
+            </>
+          )}
         </main>
         
         {/* Scroll to top button */}

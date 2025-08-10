@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { getProducts, getCategories } from '@/lib/api'
-import { Product, Category } from '@/lib/supabase'
+import { Product } from '@/lib/supabase'
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,
@@ -33,7 +33,6 @@ export default function AdminDashboard() {
       ])
 
       setProducts(productsData)
-      setCategories(categoriesData)
 
       // 통계 계산
       setStats({
@@ -237,10 +236,12 @@ export default function AdminDashboard() {
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             {product.thumbnail_url ? (
-                              <img
+                              <Image
                                 className="h-10 w-10 rounded-lg object-cover"
                                 src={product.thumbnail_url}
                                 alt={product.title}
+                                width={40}
+                                height={40}
                               />
                             ) : (
                               <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">

@@ -54,7 +54,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { title, description, category_id, price, thumbnail_url, coupang_link, naver_link } = body
+    const { title, description, category_id, price, thumbnail_url, images, coupang_link, naver_link } = body
     
     // 필수 필드 검증
     if (!title || !category_id) {
@@ -70,6 +70,7 @@ export async function PUT(
       category_id,
       price: price ? parseFloat(price) : null,
       thumbnail_url,
+      images: images || [],
       coupang_link,
       naver_link,
       updated_at: new Date().toISOString()
