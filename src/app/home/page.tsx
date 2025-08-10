@@ -1,17 +1,19 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/feedback/Spinner'
+import { Footer } from '@/components/layout/Footer'
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
 import { getCarouselTheme } from '@/lib/carousel-theme'
 
 export default function HomePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -52,6 +54,16 @@ export default function HomePage() {
     }
   ])
 
+  // URL 파라미터에서 검색어 확인 및 초기화
+  useEffect(() => {
+    const urlSearchQuery = searchParams.get('search')
+    if (urlSearchQuery) {
+      setSearchQuery(urlSearchQuery)
+      setIsSearchMode(true)
+      performSearch(urlSearchQuery)
+    }
+  }, [searchParams])
+
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +82,13 @@ export default function HomePage() {
       }
     }
 
-    fetchData()
+    // URL에 검색 파라미터가 없을 때만 기본 데이터 로드
+    const urlSearchQuery = searchParams.get('search')
+    if (!urlSearchQuery) {
+      fetchData()
+    } else {
+      setIsLoading(false)
+    }
   }, [])
 
   // Scroll to top functionality
@@ -258,24 +276,15 @@ export default function HomePage() {
         <div className="bg-white">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+              <button 
+                onClick={() => router.push('/home')}
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
                 <div className="w-6 h-6 text-teal-400">
                   ✨
                 </div>
                 <span className="text-lg font-bold text-[#19D7D2]">kukrule</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-1 text-sm text-gray-600">
-                  <span>🌐</span>
-                  <span>한국어</span>
-                  <span className="text-xs">▼</span>
-                </button>
-                <button className="text-gray-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </button>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -312,13 +321,6 @@ export default function HomePage() {
           </div>
         </header>
 
-        {/* Navigation tabs */}
-        <div className="bg-white px-4">
-          <div className="flex space-x-6 border-b border-gray-200">
-            <button className="pb-2 text-sm font-medium text-teal-500 border-b-2 border-teal-500">홈</button>
-            <button className="pb-2 text-sm text-gray-500">이벤트</button>
-          </div>
-        </div>
 
         {/* Main content */}
         <main>
@@ -392,14 +394,7 @@ export default function HomePage() {
                           <p className="text-sm text-gray-500 mb-2">
                             {product.categories?.name || '카테고리'}
                           </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <div className="flex items-center">
-                                <span className="text-yellow-400 text-sm">⭐</span>
-                                <span className="text-sm font-medium ml-1">4.{8 - (index % 5)}</span>
-                              </div>
-                              <span className="text-xs text-gray-400">({(1000 + index * 100).toLocaleString()})</span>
-                            </div>
+                          <div className="flex items-center justify-end">
                             {product.price && (
                               <span className="text-lg font-bold text-teal-600">
                                 ₩{product.price.toLocaleString()}
@@ -514,140 +509,221 @@ export default function HomePage() {
               </div>
 
 
-          {/* Rising Ranking Section */}
+          {/* Kukrule Category Section */}
           <div className="px-4 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="text-sm text-gray-500">8월 6일 수요일</span>
-                <h3 className="text-lg font-bold text-gray-900">급상승 랭킹</h3>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-400">1/10</span>
-                <button className="text-gray-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-gray-900">국룰템 카테고리</h3>
             </div>
             
-            {/* Featured 1st place item */}
-            {products.length > 0 && (
+            {/* Category Grid - 3x3 with empty card */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* 화장품 */}
               <Card 
                 variant="base" 
-                className="mb-4 p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => router.push(`/products/${products[0].id}`)}
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '화장품')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
               >
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                      {products[0].thumbnail_url ? (
-                        <Image 
-                          src={products[0].thumbnail_url} 
-                          alt={products[0].title}
-                          width={80}
-                          height={80}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-400 text-sm">제품</span>
-                      )}
-                    </div>
-                    <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                      1위
-                    </div>
-                    <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs px-1 rounded">
-                      ▲1
-                    </div>
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/cosmetics.png" 
+                      alt="화장품"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">{products[0].title}</h4>
-                    <p className="text-sm text-gray-500 mb-2">{products[0].categories?.name}</p>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <span className="text-yellow-400 text-sm">⭐</span>
-                        <span className="text-sm font-medium ml-1">4.8</span>
-                      </div>
-                      <span className="text-xs text-gray-400">(2,580)</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-teal-600">
-                      ₩{products[0].price?.toLocaleString()}
-                    </span>
-                  </div>
+                  <span className="text-sm font-medium text-gray-900">화장품</span>
                 </div>
               </Card>
-            )}
 
-            {/* Ranking list */}
-            <div className="grid grid-cols-2 gap-3">
-              {products.slice(1, 5).map((product, index) => {
-                const rank = index + 2
-                return (
-                  <div key={product.id} className="flex items-center space-x-2 p-2">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-sm font-medium text-gray-600">
-                      {rank}
-                    </div>
-                    <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {(() => {
-                        const thumbnailUrl = (product.images && product.images.length > 0) 
-                          ? product.images[0] 
-                          : product.thumbnail_url
-                        
-                        return thumbnailUrl ? (
-                          <Image 
-                            src={thumbnailUrl} 
-                            alt={product.title}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs text-gray-400">제품</span>
-                        )
-                      })()
-                      }
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-sm font-medium text-gray-900 truncate">{product.title}</h5>
-                      <div className="flex items-center">
-                        <span className="text-yellow-400 text-xs">⭐</span>
-                        <span className="text-xs ml-1">4.{8-index}</span>
-                      </div>
-                    </div>
+              {/* 가구 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '가구')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/furniture.png" 
+                      alt="가구"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                )
-              })}
+                  <span className="text-sm font-medium text-gray-900">가구</span>
+                </div>
+              </Card>
+
+              {/* 생활가전 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '생활가전')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/home_appliances.png" 
+                      alt="생활가전"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">생활가전</span>
+                </div>
+              </Card>
+
+              {/* PC주변기기 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === 'PC주변기기')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/pc_peripherals.png" 
+                      alt="PC주변기기"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">PC주변기기</span>
+                </div>
+              </Card>
+
+              {/* 스포츠용품 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '스포츠용품')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/sporting_goods.png" 
+                      alt="스포츠용품"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">스포츠용품</span>
+                </div>
+              </Card>
+
+              {/* 타블렛PC */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '타블렛PC')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/tablet_and_smartphone.png" 
+                      alt="타블렛PC"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">타블렛PC</span>
+                </div>
+              </Card>
+
+              {/* 생활용품 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '생활용품')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/household_goods.png" 
+                      alt="생활용품"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">생활용품</span>
+                </div>
+              </Card>
+
+              {/* 빈 카테고리 카드 */}
+              <Card variant="base" className="p-4 text-center bg-gray-50">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center bg-gray-200 rounded-full">
+                    <span className="text-gray-400 text-xs">+</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-400">추가 예정</span>
+                </div>
+              </Card>
+
+              {/* 빈 카테고리 카드 2 */}
+              <Card variant="base" className="p-4 text-center bg-gray-50">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 flex items-center justify-center bg-gray-200 rounded-full">
+                    <span className="text-gray-400 text-xs">+</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-400">추가 예정</span>
+                </div>
+              </Card>
             </div>
           </div>
 
-          {/* Customer Choice Ranking */}
+          {/* Click-based Ranking */}
           <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">국룰 고객들이 직접 선택한 랭킹</h3>
-              <button className="text-sm text-teal-500 font-medium">카테고리 전체보기</button>
+              <h3 className="text-lg font-bold text-gray-900">가장 많은 사용자가 선택한 제품 랭킹</h3>
             </div>
             <div className="space-y-3">
               {products.slice(0, 5).map((product, index) => {
                 const rank = index + 1
-                const baseRating = 4.60 - index * 0.02 // 4.60, 4.58, 4.56, etc.
-                const baseReviews = 12000 - index * 1000 // 리뷰 수도 리얼하게 만들기
                 
                 return (
                   <div 
                     key={product.id} 
-                    className="flex items-center space-x-3 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center space-x-3 p-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
                     onClick={() => router.push(`/products/${product.id}`)}
                   >
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-sm font-bold text-gray-700">
+                    <div className="w-8 h-8 bg-teal-500 text-white rounded flex items-center justify-center text-sm font-bold">
                       {rank}
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{product.title}</h4>
                       <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-gray-600">{baseRating.toFixed(2)}</span>
-                        <span className="text-gray-400">({baseReviews.toLocaleString()})</span>
+                        <span className="text-gray-600">{product.categories?.name || '카테고리'}</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="text-gray-600">{product.title}</span>
                       </div>
                     </div>
                   </div>
@@ -656,220 +732,12 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Skin Type Ranking */}
-          <div className="px-4 mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">피부 타입별 랭킹</h3>
-            
-            {/* Tab navigation */}
-            <div className="flex space-x-1 mb-6 overflow-x-auto">
-              {['건성', '지성', '중성', '복합성', '민감성', '여드름', '아토피'].map((type, index) => (
-                <button
-                  key={type}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                    index === 0
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
 
-            {/* Skin type products */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {products.slice(0, 6).map((product, index) => {
-                const rating = 4.8 - index * 0.1
-                const reviews = 1200 + index * 100
-                
-                return (
-                  <div key={product.id} className="flex items-center space-x-2 p-3 border border-gray-100 rounded-lg">
-                    <div className="w-6 h-6 bg-yellow-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-yellow-600">🏆</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {(() => {
-                        const thumbnailUrl = (product.images && product.images.length > 0) 
-                          ? product.images[0] 
-                          : product.thumbnail_url
-                        
-                        return thumbnailUrl ? (
-                          <Image 
-                            src={thumbnailUrl} 
-                            alt={product.title}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs text-gray-400">제품</span>
-                        )
-                      })()
-                      }
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-sm font-medium text-gray-900 truncate">
-                        {product.title.substring(0, 15)}{product.title.length > 15 ? '...' : ''}
-                      </h5>
-                      <div className="flex items-center text-xs">
-                        <span className="text-yellow-400">⭐</span>
-                        <span className="ml-1">{rating.toFixed(1)}</span>
-                        <span className="text-gray-400 ml-1">({reviews})</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            
-            <button className="w-full py-2 text-sm text-teal-500 font-medium border border-teal-200 rounded-lg hover:bg-teal-50">
-              건성 전체보기
-            </button>
-          </div>
-
-          {/* Age Group Recommendations */}
-          <div className="px-4 mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">나이대별 추천</h3>
-            
-            {/* Age tabs */}
-            <div className="flex space-x-1 mb-6">
-              {['10대', '20대', '30대', '40대 이상'].map((age, index) => (
-                <button
-                  key={age}
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    index === 1
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {age}
-                </button>
-              ))}
-            </div>
-
-            {/* Age group products */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {products.slice(0, 6).map((product, index) => {
-                const rank = index + 1
-                const rating = 4.7 - index * 0.1
-                const reviews = 800 + index * 80
-                
-                return (
-                  <div key={`age-${product.id}`} className="flex items-center space-x-2 p-3 border border-gray-100 rounded-lg">
-                    <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs font-bold text-blue-600">{rank}</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {(() => {
-                        const thumbnailUrl = (product.images && product.images.length > 0) 
-                          ? product.images[0] 
-                          : product.thumbnail_url
-                        
-                        return thumbnailUrl ? (
-                          <Image 
-                            src={thumbnailUrl} 
-                            alt={product.title}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs text-gray-400">제품</span>
-                        )
-                      })()
-                      }
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-sm font-medium text-gray-900 truncate">
-                        {product.title.substring(0, 15)}{product.title.length > 15 ? '...' : ''}
-                      </h5>
-                      <div className="flex items-center text-xs">
-                        <span className="text-yellow-400">⭐</span>
-                        <span className="ml-1">{rating.toFixed(1)}</span>
-                        <span className="text-gray-400 ml-1">({reviews})</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            
-            <button className="w-full py-2 text-sm text-teal-500 font-medium border border-teal-200 rounded-lg hover:bg-teal-50">
-              20대 전체보기
-            </button>
-          </div>
-
-          {/* Trending Brands */}
-          <div className="px-4 mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">요즘 뜨는 브랜드</h3>
-            
-            <div className="space-y-4">
-              {categories.slice(0, 3).map((category, index) => {
-                const rank = index + 1
-                const changes = [4, 2, -1]
-                const categoryProducts = products.filter(p => p.category_id === category.id).slice(0, 3)
-                
-                return (
-                  <Card key={category.id} variant="base" className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-lg font-bold text-gray-900">{rank}위</span>
-                        <span className="font-semibold text-gray-900">{category.name} 브랜드</span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          changes[index] > 0 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                        }`}>
-                          {changes[index] > 0 ? '▲' : '▼'}{Math.abs(changes[index])}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      {categoryProducts.length > 0 ? (
-                        categoryProducts.map((product) => (
-                          <div key={product.id} className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {(() => {
-                              const thumbnailUrl = (product.images && product.images.length > 0) 
-                                ? product.images[0] 
-                                : product.thumbnail_url
-                              
-                              return thumbnailUrl ? (
-                                <Image 
-                                  src={thumbnailUrl} 
-                                  alt={product.title}
-                                  width={64}
-                                  height={64}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-xs text-gray-400">제품</span>
-                              )
-                            })()
-                            }
-                          </div>
-                        ))
-                      ) : (
-                        // 카테고리에 제품이 없을 경우 기본 플레이스홀더
-                        Array.from({ length: 3 }, (_, idx) => (
-                          <div key={idx} className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs text-gray-400">제품</span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
-            
-            <button className="w-full py-3 mt-4 text-sm text-teal-500 font-medium border border-teal-200 rounded-lg hover:bg-teal-50">
-              브랜드 전체보기
-            </button>
-          </div>
-
-              {/* Bottom spacing */}
-              <div className="h-20"></div>
             </>
           )}
         </main>
+        
+        <Footer />
         
         {/* Scroll to top button */}
         {showScrollTop && (

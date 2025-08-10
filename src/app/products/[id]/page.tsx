@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
+import { Footer } from '@/components/layout/Footer'
 import { getProducts, getComments, createComment, deleteComment } from '@/lib/api'
 import { Product, Comment } from '@/lib/supabase'
 
@@ -37,6 +38,9 @@ export default function ProductDetailPage() {
   // 댓글 삭제 상태
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null)
   const [deletePassword, setDeletePassword] = useState('')
+  
+  // 검색 관련 상태
+  const [searchQuery, setSearchQuery] = useState('')
 
   // 제품 정보 가져오기
   useEffect(() => {
@@ -143,6 +147,14 @@ export default function ProductDetailPage() {
       alert(err instanceof Error ? err.message : '댓글 삭제에 실패했습니다.')
     }
   }
+  
+  // 검색 핸들러
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/home?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -179,29 +191,15 @@ export default function ProductDetailPage() {
         <div className="bg-white">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => router.push('/home')}
-                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-                >
-                  <div className="w-6 h-6 text-teal-400">
-                    ✨
-                  </div>
-                  <span className="text-lg font-bold text-[#19D7D2]">kukrule</span>
-                </button>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-1 text-sm text-gray-600">
-                  <span>🌐</span>
-                  <span>한국어</span>
-                  <span className="text-xs">▼</span>
-                </button>
-                <button className="text-gray-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </button>
-              </div>
+              <button 
+                onClick={() => router.push('/home')}
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-6 h-6 text-teal-400">
+                  ✨
+                </div>
+                <span className="text-lg font-bold text-[#19D7D2]">kukrule</span>
+              </button>
             </div>
           </div>
         </div>
@@ -210,18 +208,25 @@ export default function ProductDetailPage() {
         <header className="bg-white sticky top-0 z-50">
           {/* Search bar */}
           <div className="px-4 py-3">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="궁금한 국민 아이템을 검색해 보세요"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
-              />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="궁금한 국민 아이템을 검색해 보세요"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                />
+                <button 
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-500"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
           </div>
         </header>
 
@@ -244,7 +249,7 @@ export default function ProductDetailPage() {
 
         {/* 제품 정보 */}
         <div className="p-4">
-          <Card variant="base" className="mb-6">
+          <div className="bg-white p-4 mb-6">
             {/* 제품 이미지 갤러리 */}
             <div className="mb-4">
               {/* 메인 이미지 */}
@@ -353,13 +358,16 @@ export default function ProductDetailPage() {
                 {product.description}
               </p>
             </div>
-          </Card>
+          </div>
+
+          {/* 구분선 */}
+          <div className="border-t border-gray-200 my-6"></div>
 
           {/* 댓글 섹션 */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-gray-900">
-                국룰 훈수 ({comments.length})
+              <h3 className="text-sm font-semibold text-gray-900">
+                훈수 두기 ({comments.length})
               </h3>
               <Button 
                 variant="primary" 
@@ -376,40 +384,40 @@ export default function ProductDetailPage() {
                 <form onSubmit={handleCommentSubmit}>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         닉네임
                       </label>
                       <input
                         type="text"
                         value={commentForm.author}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, author: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
                         placeholder="닉네임을 입력하세요"
                         maxLength={50}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         비밀번호 (수정/삭제용)
                       </label>
                       <input
                         type="password"
                         value={commentForm.password}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, password: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
                         placeholder="비밀번호를 입력하세요"
                         maxLength={20}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         댓글
                       </label>
                       <textarea
                         value={commentForm.content}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, content: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
-                        placeholder="국룰 훈수를 남겨보세요!"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
+                        placeholder="훈수를 남겨보세요!"
                         rows={4}
                         maxLength={1000}
                       />
@@ -444,8 +452,8 @@ export default function ProductDetailPage() {
             {/* 댓글 목록 */}
             {comments.length === 0 ? (
               <Card variant="base" className="text-center py-8">
-                <p className="text-gray-500">아직 댓글이 없습니다.</p>
-                <p className="text-sm text-gray-400 mt-1">첫 번째 국룰 훈수를 남겨보세요!</p>
+                <p className="text-xs text-gray-500">아직 댓글이 없습니다.</p>
+                <p className="text-xs text-gray-400 mt-1">첫 번째 훈수를 남겨보세요!</p>
               </Card>
             ) : (
               <div className="bg-white rounded-xl overflow-hidden">
@@ -461,7 +469,7 @@ export default function ProductDetailPage() {
                           </svg>
                         </div>
                         {/* 닉네임 */}
-                        <span className="font-semibold text-gray-900">{comment.author}</span>
+                        <span className="text-xs font-semibold text-gray-900">{comment.author}</span>
                       </div>
                       {/* 날짜 */}
                       <span className="text-xs text-gray-500">
@@ -477,7 +485,7 @@ export default function ProductDetailPage() {
                     
                     {/* 본문: 닉네임 영역 아래에 표시 */}
                     <div className="ml-13">
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">
+                      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">
                         {comment.content}
                       </p>
                       
@@ -525,6 +533,8 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+        
+        <Footer />
         
         {/* 이미지 갤러리 모달 */}
         {isImageGalleryOpen && (() => {
