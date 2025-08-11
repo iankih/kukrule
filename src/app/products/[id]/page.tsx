@@ -215,7 +215,7 @@ export default function ProductDetailPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="궁금한 국민 아이템을 검색해 보세요"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
                 <button 
                   type="submit"
@@ -311,13 +311,10 @@ export default function ProductDetailPage() {
               </div>
             </div>
             
-            {/* 제조사 아이콘 / 이름 */}
-            <div className="flex items-center space-x-2 mb-3">
-              <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-gray-500 text-xs font-bold">브</span>
-              </div>
+            {/* 제조사 정보 */}
+            <div className="mb-3">
               <Badge variant="secondary" className="text-xs">
-                {product.categories?.name} 브랜드
+                {product.manufacturer || product.categories?.name || '제조사 미등록'}
               </Badge>
             </div>
             

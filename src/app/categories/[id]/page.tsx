@@ -32,7 +32,8 @@ export default function CategoryPage() {
     'PC주변기기': 'pc_peripherals',
     '스포츠용품': 'sporting_goods',
     '타블렛PC': 'tablet_and_smartphone',
-    '생활용품': 'household_goods'
+    '생활용품': 'household_goods',
+    '유아용품': 'baby'
   }
 
   useEffect(() => {
@@ -134,7 +135,7 @@ export default function CategoryPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="궁금한 국민 아이템을 검색해 보세요"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
                 <button 
                   type="submit"
@@ -194,16 +195,16 @@ export default function CategoryPage() {
         {/* Products List */}
         <main className="px-4 py-4">
           {products.length > 0 ? (
-            <div className="space-y-4">
+            <div>
               {products.map((product) => (
-                <Card 
+                <div 
                   key={product.id}
-                  variant="base"
-                  className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                  className="py-3 cursor-pointer border-b border-gray-100 last:border-b-0"
                   onClick={() => router.push(`/products/${product.id}`)}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="flex items-center">
+                    {/* 제품 사진 */}
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 mr-4">
                       {(() => {
                         const thumbnailUrl = (product.images && product.images.length > 0) 
                           ? product.images[0] 
@@ -213,8 +214,8 @@ export default function CategoryPage() {
                           <Image 
                             src={thumbnailUrl} 
                             alt={product.title}
-                            width={80}
-                            height={80}
+                            width={64}
+                            height={64}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -222,25 +223,31 @@ export default function CategoryPage() {
                         )
                       })()}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    
+                    {/* 제조사 */}
+                    <div className="w-20 flex-shrink-0 mr-3">
+                      <span className="text-sm text-gray-500">
+                        {product.manufacturer || product.categories?.name || '미등록'}
+                      </span>
+                    </div>
+                    
+                    {/* 제품명 */}
+                    <div className="flex-1 min-w-0 mr-4">
+                      <h3 className="text-sm text-gray-900 truncate">
                         {product.title}
                       </h3>
-                      {product.description && (
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                          {product.description}
-                        </p>
-                      )}
+                    </div>
+                    
+                    {/* 가격 (우측 정렬) */}
+                    <div className="flex-shrink-0 text-right">
                       {product.price && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-teal-600">
-                            ₩{product.price.toLocaleString()}
-                          </span>
-                        </div>
+                        <span className="text-sm text-gray-900">
+                          ₩{product.price.toLocaleString()}
+                        </span>
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           ) : (

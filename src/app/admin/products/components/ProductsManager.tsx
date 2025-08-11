@@ -14,6 +14,7 @@ interface ProductFormData {
   title: string
   description: string
   category_id: string
+  manufacturer: string
   price: string
   images: string[]
   coupang_link: string
@@ -35,6 +36,7 @@ export default function ProductsManager() {
     title: '',
     description: '',
     category_id: '',
+    manufacturer: '',
     price: '',
     images: [],
     coupang_link: '',
@@ -77,6 +79,7 @@ export default function ProductsManager() {
         title: formData.title,
         description: formData.description || undefined,
         category_id: formData.category_id,
+        manufacturer: formData.manufacturer || undefined,
         price: formData.price ? parseFloat(formData.price) : undefined,
         thumbnail_url: formData.images.length > 0 ? formData.images[0] : undefined,
         images: formData.images,
@@ -116,6 +119,7 @@ export default function ProductsManager() {
       title: product.title,
       description: product.description || '',
       category_id: product.category_id,
+      manufacturer: product.manufacturer || '',
       price: product.price?.toString() || '',
       images: allImages,
       coupang_link: product.coupang_link || '',
@@ -208,6 +212,7 @@ export default function ProductsManager() {
       title: '',
       description: '',
       category_id: '',
+      manufacturer: '',
       price: '',
       images: [],
       coupang_link: '',
@@ -300,6 +305,20 @@ export default function ProductsManager() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      제조사
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.manufacturer}
+                      onChange={(e) => setFormData(prev => ({ ...prev, manufacturer: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      placeholder="제조사명을 입력하세요"
+                      disabled={isSubmitting}
+                    />
                   </div>
 
                   <div>

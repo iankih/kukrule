@@ -277,7 +277,14 @@ export default function HomePage() {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <button 
-                onClick={() => router.push('/home')}
+                onClick={() => {
+                  // 검색 상태 초기화
+                  setSearchQuery('')
+                  setIsSearchMode(false)
+                  setSearchResults([])
+                  // 홈으로 이동
+                  router.push('/home')
+                }}
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
                 <div className="w-6 h-6 text-teal-400">
@@ -299,7 +306,7 @@ export default function HomePage() {
                 value={searchQuery}
                 onChange={handleSearchInput}
                 placeholder="궁금한 국민 아이템을 검색해 보세요"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
               {searchQuery ? (
                 <button 
@@ -357,18 +364,17 @@ export default function HomePage() {
                   </div>
                 </div>
               ) : searchResults.length > 0 ? (
-                <div className="space-y-3 mb-8">
+                <div className="mb-8">
                   {searchResults.map((product, index) => (
-                    <Card 
+                    <div 
                       key={product.id} 
-                      variant="base" 
-                      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                      className="py-3 cursor-pointer border-b border-gray-100 last:border-b-0"
                       onClick={() => router.push(`/products/${product.id}`)}
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <div className="flex items-center">
+                        {/* 제품 사진 */}
+                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 mr-4">
                           {(() => {
-                            // 첫 번째 이미지를 썸네일로 사용 (새로운 방식)
                             const thumbnailUrl = (product.images && product.images.length > 0) 
                               ? product.images[0] 
                               : product.thumbnail_url
@@ -384,26 +390,33 @@ export default function HomePage() {
                             ) : (
                               <span className="text-gray-400 text-sm">제품</span>
                             )
-                          })()
-                          }
+                          })()}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2" style={{ color: '#111827' }}>
+                        
+                        {/* 제조사 */}
+                        <div className="w-20 flex-shrink-0 mr-3">
+                          <span className="text-sm text-gray-500">
+                            {product.manufacturer || product.categories?.name || '미등록'}
+                          </span>
+                        </div>
+                        
+                        {/* 제품명 */}
+                        <div className="flex-1 min-w-0 mr-4">
+                          <h3 className="text-sm text-gray-900 truncate">
                             {product.title}
                           </h3>
-                          <p className="text-sm text-gray-500 mb-2">
-                            {product.categories?.name || '카테고리'}
-                          </p>
-                          <div className="flex items-center justify-end">
-                            {product.price && (
-                              <span className="text-lg font-bold text-teal-600">
-                                ₩{product.price.toLocaleString()}
-                              </span>
-                            )}
-                          </div>
+                        </div>
+                        
+                        {/* 가격 (우측 정렬) */}
+                        <div className="flex-shrink-0 text-right">
+                          {product.price && (
+                            <span className="text-sm text-gray-900">
+                              ₩{product.price.toLocaleString()}
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -678,13 +691,26 @@ export default function HomePage() {
                 </div>
               </Card>
 
-              {/* 빈 카테고리 카드 */}
-              <Card variant="base" className="p-4 text-center bg-gray-50">
+              {/* 유아용품 */}
+              <Card 
+                variant="base" 
+                className="p-4 cursor-pointer hover:shadow-lg transition-shadow text-center"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === '유아용품')
+                  if (category) router.push(`/categories/${category.id}`)
+                }}
+              >
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-12 h-12 flex items-center justify-center bg-gray-200 rounded-full">
-                    <span className="text-gray-400 text-xs">+</span>
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <Image 
+                      src="/baby.png" 
+                      alt="유아용품"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                  <span className="text-sm font-medium text-gray-400">추가 예정</span>
+                  <span className="text-sm font-medium text-gray-900">유아용품</span>
                 </div>
               </Card>
 
@@ -705,25 +731,64 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900">가장 많은 사용자가 선택한 제품 랭킹</h3>
             </div>
-            <div className="space-y-3">
+            <div>
               {products.slice(0, 5).map((product, index) => {
                 const rank = index + 1
                 
                 return (
                   <div 
                     key={product.id} 
-                    className="flex items-center space-x-3 p-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
+                    className="py-3 cursor-pointer border-b border-gray-100 last:border-b-0"
                     onClick={() => router.push(`/products/${product.id}`)}
                   >
-                    <div className="w-8 h-8 bg-teal-500 text-white rounded flex items-center justify-center text-sm font-bold">
-                      {rank}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{product.title}</h4>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <span className="text-gray-600">{product.categories?.name || '카테고리'}</span>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-gray-600">{product.title}</span>
+                    <div className="flex items-center">
+                      {/* 순위 */}
+                      <div className="w-8 flex-shrink-0 mr-4 flex justify-center">
+                        <span className="text-sm text-gray-900 font-medium">
+                          {rank}
+                        </span>
+                      </div>
+                      
+                      {/* 제품 사진 */}
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 mr-4">
+                        {(() => {
+                          const thumbnailUrl = (product.images && product.images.length > 0) 
+                            ? product.images[0] 
+                            : product.thumbnail_url
+                          
+                          return thumbnailUrl ? (
+                            <Image 
+                              src={thumbnailUrl} 
+                              alt={product.title}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-sm">제품</span>
+                          )
+                        })()}
+                      </div>
+                      
+                      {/* 브랜드 */}
+                      <div className="w-20 flex-shrink-0 mr-3">
+                        <span className="text-sm text-gray-500">
+                          {product.manufacturer || product.categories?.name || '미등록'}
+                        </span>
+                      </div>
+                      
+                      {/* 제품명 */}
+                      <div className="w-32 flex-shrink-0 mr-3">
+                        <h4 className="text-sm text-gray-900 truncate">
+                          {product.title}
+                        </h4>
+                      </div>
+                      
+                      {/* 설명 */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-600 truncate">
+                          {product.description || '제품 설명이 없습니다.'}
+                        </p>
                       </div>
                     </div>
                   </div>

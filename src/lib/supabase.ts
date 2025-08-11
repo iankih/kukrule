@@ -17,6 +17,7 @@ export interface Product {
   title: string
   description: string | null
   category_id: string
+  manufacturer: string | null
   price: number | null
   thumbnail_url: string | null
   images: string[] | null // 추가 이미지들 (JSON 배열)
