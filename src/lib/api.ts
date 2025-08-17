@@ -21,6 +21,8 @@ export async function getProducts(params: {
   search?: string
   limit?: number
   offset?: number
+  sortBy?: 'created_at' | 'total_clicks' | 'view_count'
+  order?: 'asc' | 'desc'
 } = {}) {
   const searchParams = new URLSearchParams()
   
@@ -28,6 +30,8 @@ export async function getProducts(params: {
   if (params.search) searchParams.set('search', params.search)
   if (params.limit) searchParams.set('limit', params.limit.toString())
   if (params.offset) searchParams.set('offset', params.offset.toString())
+  if (params.sortBy) searchParams.set('sort_by', params.sortBy)
+  if (params.order) searchParams.set('order', params.order)
   
   const url = `${API_BASE_URL}/api/products${searchParams.toString() ? `?${searchParams}` : ''}`
   

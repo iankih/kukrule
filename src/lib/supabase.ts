@@ -26,6 +26,11 @@ export interface Product {
   created_at: string
   updated_at: string
   categories?: Category
+  // Analytics 필드
+  view_count?: number
+  coupang_clicks?: number
+  naver_clicks?: number
+  total_clicks?: number
 }
 
 export interface Comment {

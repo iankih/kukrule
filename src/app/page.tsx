@@ -72,7 +72,7 @@ export default function HomePage() {
       try {
         setIsLoading(true)
         const [productsData, categoriesData] = await Promise.all([
-          getProducts({ limit: 10 }),
+          getProducts({ limit: 10, sortBy: 'total_clicks', order: 'desc' }),
           getCategories()
         ])
         setProducts(productsData)
@@ -247,13 +247,32 @@ export default function HomePage() {
   }
 
   // 검색창 클리어
-  const clearSearch = () => {
+  const clearSearch = async () => {
     setSearchQuery('')
     setSearchResults([])
     setIsSearchMode(false)
     // 검색 타이머도 정리
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
+    }
+    // URL을 루트로 이동하여 search 파라미터 제거
+    router.push('/')
+    
+    // 기본 데이터 로드 (제품이 비어있는 경우)
+    if (products.length === 0) {
+      try {
+        setIsLoading(true)
+        const [productsData, categoriesData] = await Promise.all([
+          getProducts({ limit: 10, sortBy: 'total_clicks', order: 'desc' }),
+          getCategories()
+        ])
+        setProducts(productsData)
+        setCategories(categoriesData)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다.')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -804,7 +823,7 @@ export default function HomePage() {
           {/* Click-based Ranking */}
           <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">가장 많은 사용자가 선택한 제품 랭킹</h3>
+              <h3 className="text-lg font-bold text-gray-900">가장 많은 사용자가 구매한 제품 랭킹</h3>
             </div>
             <div>
               {products.slice(0, 5).map((product, index) => {
@@ -859,11 +878,21 @@ export default function HomePage() {
                         </h4>
                       </div>
                       
-                      {/* 설명 */}
+                      {/* 설명 및 클릭 수 */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-600 truncate">
                           {product.description || '제품 설명이 없습니다.'}
                         </p>
+                        {/* 클릭 통계 정보 - 나중에 오픈 예정
+                        <div className="flex items-center space-x-3 mt-1">
+                          <span className="text-xs text-gray-500">
+                            총 {(product as any).total_clicks || 0}번 클릭
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            조회 {(product as any).view_count || 0}
+                          </span>
+                        </div>
+                        */}
                       </div>
                     </div>
                   </div>

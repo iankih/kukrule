@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = parseInt(searchParams.get('offset') || '0')
+    const sortBy = searchParams.get('sort_by') || 'created_at'
+    const order = searchParams.get('order') || 'desc'
 
     let query = supabase
       .from('products')
@@ -25,12 +27,14 @@ export async function GET(request: NextRequest) {
     if (search) {
       // title 또는 description에서 검색어 찾기 (대소문자 구분 없음)
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
-      // 검색 시에는 관련도 순으로 정렬하기 위해 created_at 순으로 먼저 정렬
-      query = query.order('created_at', { ascending: false })
-    } else {
-      // 검색이 없으면 기본 최신순 정렬
-      query = query.order('created_at', { ascending: false })
     }
+
+    // 정렬 옵션 적용
+    const validSortColumns = ['created_at', 'total_clicks', 'view_count', 'coupang_clicks', 'naver_clicks']
+    const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'created_at'
+    const ascending = order === 'asc'
+    
+    query = query.order(sortColumn, { ascending })
 
     // 카테고리 필터링
     if (categoryId) {

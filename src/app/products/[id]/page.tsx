@@ -10,6 +10,7 @@ import { Spinner } from '@/components/feedback/Spinner'
 import { Footer } from '@/components/layout/Footer'
 import { getProducts, getComments, createComment, deleteComment } from '@/lib/api'
 import { Product, Comment } from '@/lib/supabase'
+import { trackProductViewOnce, trackCoupangClick, trackNaverClick } from '@/lib/analytics'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -56,6 +57,9 @@ export default function ProductDetailPage() {
         }
         
         setProduct(foundProduct)
+        
+        // 제품 조회수 추적 (한 번만)
+        trackProductViewOnce(productId)
         
         // 댓글도 함께 가져오기
         const commentsData = await getComments(productId)
@@ -315,17 +319,17 @@ export default function ProductDetailPage() {
             {/* 카테고리 및 제조사 정보 */}
             <div className="flex flex-wrap gap-2 mb-3">
               {product.categories?.name && (
-                <Badge variant="primary" size="sm">
+                <Badge variant="primary">
                   카테고리: {product.categories.name}
                 </Badge>
               )}
               {product.manufacturer && (
-                <Badge variant="secondary" size="sm">
+                <Badge variant="secondary">
                   제조사: {product.manufacturer}
                 </Badge>
               )}
               {!product.categories?.name && !product.manufacturer && (
-                <Badge variant="secondary" size="sm">
+                <Badge variant="secondary">
                   미분류
                 </Badge>
               )}
@@ -345,7 +349,10 @@ export default function ProductDetailPage() {
                 <Button 
                   variant="primary" 
                   size="sm"
-                  onClick={() => window.open(product.coupang_link!, '_blank')}
+                  onClick={() => {
+                    trackCoupangClick(productId)
+                    window.open(product.coupang_link!, '_blank')
+                  }}
                 >
                   쿠팡에서 보기
                 </Button>
@@ -354,7 +361,10 @@ export default function ProductDetailPage() {
                 <Button 
                   variant="secondary" 
                   size="sm"
-                  onClick={() => window.open(product.naver_link!, '_blank')}
+                  onClick={() => {
+                    trackNaverClick(productId)
+                    window.open(product.naver_link!, '_blank')
+                  }}
                 >
                   네이버에서 보기
                 </Button>
