@@ -23,6 +23,8 @@ export default function CarouselManager() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [setupError, setSetupError] = useState<string | null>(null)
+  const [carouselEnabled, setCarouselEnabled] = useState(false)
+  const [isToggling, setIsToggling] = useState(false)
 
   // 캐러셀 데이터 상태 관리
   const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([
@@ -48,6 +50,30 @@ export default function CarouselManager() {
       image: null
     }
   ])
+
+  // 캐러셀 설정 불러오기
+  const loadCarouselSettings = async () => {
+    try {
+      // 먼저 localStorage에서 확인
+      const localSettings = localStorage.getItem('carousel-settings')
+      if (localSettings) {
+        const parsedSettings = JSON.parse(localSettings)
+        setCarouselEnabled(parsedSettings.enabled)
+      }
+
+      const response = await fetch('/api/carousel/settings')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setCarouselEnabled(data.data.enabled)
+          // localStorage에도 저장
+          localStorage.setItem('carousel-settings', JSON.stringify(data.data))
+        }
+      }
+    } catch (error) {
+      console.error('캐러셀 설정 로드 실패:', error)
+    }
+  }
 
   // 컴포넌트 마운트 시 데이터베이스에서 데이터 불러오기
   useEffect(() => {
@@ -91,6 +117,7 @@ export default function CarouselManager() {
     }
 
     loadCarouselData()
+    loadCarouselSettings()
   }, [])
 
   const handleSetupDatabase = async () => {
@@ -214,6 +241,52 @@ export default function CarouselManager() {
     )
   }
 
+  // 캐러셀 토글 핸들러
+  const handleToggleCarousel = async () => {
+    try {
+      setIsToggling(true)
+      const credentials = btoa(`${process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'}:${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'kukrule2025!'}`)
+      
+      const response = await fetch('/api/carousel/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        },
+        body: JSON.stringify({
+          enabled: !carouselEnabled
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '설정 변경에 실패했습니다.')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        setCarouselEnabled(result.data.enabled)
+        
+        // localStorage에도 저장
+        localStorage.setItem('carousel-settings', JSON.stringify(result.data))
+        
+        // 홈페이지에서 사용할 수 있도록 window 이벤트 발생
+        window.dispatchEvent(new CustomEvent('carousel-settings-updated', { 
+          detail: result.data 
+        }))
+        
+        alert(`캐러셀이 ${result.data.enabled ? '활성화' : '비활성화'}되었습니다.`)
+      } else {
+        throw new Error(result.error || '설정 변경에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('캐러셀 토글 실패:', error)
+      alert(error instanceof Error ? error.message : '설정 변경에 실패했습니다.')
+    } finally {
+      setIsToggling(false)
+    }
+  }
+
   const handleSaveChanges = async () => {
     try {
       setIsSaving(true)
@@ -286,6 +359,27 @@ export default function CarouselManager() {
               <p className="text-sm text-gray-500">홈페이지 캐러셀 이미지 및 내용 관리</p>
             </div>
             <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">캐러셀 표시:</span>
+                <button
+                  onClick={handleToggleCarousel}
+                  disabled={isToggling}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 ${
+                    carouselEnabled ? 'bg-teal-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      carouselEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm font-medium ${
+                  carouselEnabled ? 'text-teal-600' : 'text-gray-400'
+                }`}>
+                  {isToggling ? '변경 중...' : (carouselEnabled ? 'ON' : 'OFF')}
+                </span>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -302,6 +396,22 @@ export default function CarouselManager() {
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">캐러셀 항목 관리</h2>
           <p className="text-gray-600">홈페이지에 표시되는 3개의 캐러셀 항목을 관리할 수 있습니다.</p>
+          
+          {!carouselEnabled && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">캐러셀이 비활성화됨</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    현재 캐러셀이 비활성화되어 홈페이지에 표시되지 않습니다. 위의 토글 버튼으로 활성화할 수 있습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           
           {setupError && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -345,7 +455,7 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
         </div>
 
         {/* 캐러셀 항목 리스트 */}
-        <div className="space-y-6">
+        <div className={`space-y-6 ${!carouselEnabled ? 'opacity-60' : ''}`}>
           {carouselItems.map((item) => (
             <Card key={item.id} variant="base">
               <div className="p-6">

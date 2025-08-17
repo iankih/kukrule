@@ -82,7 +82,7 @@ export default function CategoryPage() {
         <div className="w-full max-w-[600px] min-w-[320px] bg-white min-h-screen shadow-xl flex items-center justify-center">
           <div className="text-center p-8">
             <p className="text-red-600 mb-4">{error}</p>
-            <Button onClick={() => router.push('/home')} variant="primary">
+            <Button onClick={() => router.push('/')} variant="primary">
               홈으로 돌아가기
             </Button>
           </div>
@@ -100,7 +100,7 @@ export default function CategoryPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/home?search=${encodeURIComponent(searchQuery.trim())}`)
+      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
@@ -112,7 +112,7 @@ export default function CategoryPage() {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <button 
-                onClick={() => router.push('/home')}
+                onClick={() => router.push('/')}
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
                 <div className="w-6 h-6 text-teal-400">
@@ -204,7 +204,7 @@ export default function CategoryPage() {
                 >
                   <div className="flex items-center">
                     {/* 제품 사진 */}
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 mr-4">
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 mr-4 border border-gray-200">
                       {(() => {
                         const thumbnailUrl = (product.images && product.images.length > 0) 
                           ? product.images[0] 
@@ -216,7 +216,7 @@ export default function CategoryPage() {
                             alt={product.title}
                             width={64}
                             height={64}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         ) : (
                           <span className="text-gray-400 text-sm">제품</span>
@@ -264,7 +264,7 @@ export default function CategoryPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push('/home')}
+                onClick={() => router.push('/')}
               >
                 홈으로 돌아가기
               </Button>

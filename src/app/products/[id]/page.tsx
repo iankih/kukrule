@@ -114,8 +114,6 @@ export default function ProductDetailPage() {
       setCommentForm({ author: '', content: '', password: '' })
       setIsCommentFormOpen(false)
       
-      alert('댓글이 성공적으로 등록되었습니다!')
-      
     } catch (err) {
       alert(err instanceof Error ? err.message : '댓글 등록에 실패했습니다.')
     } finally {
@@ -152,7 +150,7 @@ export default function ProductDetailPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/home?search=${encodeURIComponent(searchQuery.trim())}`)
+      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
@@ -192,7 +190,7 @@ export default function ProductDetailPage() {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <button 
-                onClick={() => router.push('/home')}
+                onClick={() => router.push('/')}
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
                 <div className="w-6 h-6 text-teal-400">
@@ -253,7 +251,9 @@ export default function ProductDetailPage() {
             {/* 제품 이미지 갤러리 */}
             <div className="mb-4">
               {/* 메인 이미지 */}
-              <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden mb-3 relative group cursor-pointer" onClick={() => setIsImageGalleryOpen(true)}>
+              <div className="relative w-full bg-white rounded-lg overflow-hidden mb-3 group cursor-pointer border border-gray-200" onClick={() => setIsImageGalleryOpen(true)}>
+                <div className="w-full pb-[100%]"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
                 {(() => {
                   const allImages = (product.images && product.images.length > 0) ? product.images : (product.thumbnail_url ? [product.thumbnail_url] : [])
                   const currentImage = allImages[currentImageIndex]
@@ -268,8 +268,8 @@ export default function ProductDetailPage() {
                         src={currentImage} 
                         alt={`${product.title} - 이미지 ${currentImageIndex + 1}`}
                         width={600}
-                        height={256}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        height={600}
+                        className="w-full h-full object-contain transition-transform group-hover:scale-105"
                       />
                       
                       {/* 좌우 화살표 버튼 */}
@@ -308,14 +308,27 @@ export default function ProductDetailPage() {
                   )
                 })()
                 }
+                </div>
               </div>
             </div>
             
-            {/* 제조사 정보 */}
-            <div className="mb-3">
-              <Badge variant="secondary" className="text-xs">
-                {product.manufacturer || product.categories?.name || '제조사 미등록'}
-              </Badge>
+            {/* 카테고리 및 제조사 정보 */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {product.categories?.name && (
+                <Badge variant="primary" size="sm">
+                  카테고리: {product.categories.name}
+                </Badge>
+              )}
+              {product.manufacturer && (
+                <Badge variant="secondary" size="sm">
+                  제조사: {product.manufacturer}
+                </Badge>
+              )}
+              {!product.categories?.name && !product.manufacturer && (
+                <Badge variant="secondary" size="sm">
+                  미분류
+                </Badge>
+              )}
             </div>
             
             {/* 제품명 */}
@@ -609,7 +622,7 @@ export default function ProductDetailPage() {
                             alt={`제품 이미지 ${index + 1}`}
                             width={64}
                             height={64}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </button>
                       ))}
