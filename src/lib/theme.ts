@@ -1,51 +1,51 @@
 export const theme = {
   colors: {
     primary: {
-      main: '#2D5F3F',
-      hover: '#36503F',
-      active: '#1A3323',
-      light: '#83A58F',
-      lighter: '#73FAA4',
-      dark: '#1A3323'
+      main: 'rgb(var(--color-primary))',
+      hover: 'rgb(var(--color-primary-hover))',
+      active: 'rgb(var(--color-primary-active))',
+      light: 'rgb(var(--color-primary-light))',
+      lighter: 'rgb(var(--color-primary-lighter))',
+      dark: 'rgb(var(--color-primary-active))'
     },
     neutral: {
-      white: '#FFFFFF',
-      gray50: '#F7F7F7',
-      gray100: '#F2F2F2',
-      gray200: '#E8E8E8',
-      gray300: '#D8D8D8',
-      gray400: '#AAAAAA',
-      gray500: '#666666',
-      gray600: '#3D3D3D',
-      gray900: '#111111',
-      black: '#000000'
+      white: 'rgb(var(--color-white))',
+      gray50: 'rgb(var(--color-gray-50))',
+      gray100: 'rgb(var(--color-gray-100))',
+      gray200: 'rgb(var(--color-gray-200))',
+      gray300: 'rgb(var(--color-gray-300))',
+      gray400: 'rgb(var(--color-gray-400))',
+      gray500: 'rgb(var(--color-gray-500))',
+      gray600: 'rgb(var(--color-gray-600))',
+      gray900: 'rgb(var(--color-gray-900))',
+      black: 'rgb(var(--color-black))'
     },
     semantic: {
-      success: '#2D5F3F',
-      warning: '#FF9500',
-      error: '#FF4757',
-      info: '#5352ED'
+      success: 'rgb(var(--color-success))',
+      warning: 'rgb(var(--color-warning))',
+      error: 'rgb(var(--color-error))',
+      info: 'rgb(var(--color-info))'
     },
     background: {
-      primary: '#FFFFFF',
-      secondary: '#F7F7F7',
-      accent: '#E8F0EB',
-      overlay: 'rgba(0, 0, 0, 0.5)'
+      primary: 'rgb(var(--color-white))',
+      secondary: 'rgb(var(--color-gray-50))',
+      accent: 'rgba(var(--color-primary-light), 0.1)',
+      overlay: 'rgba(var(--color-black), 0.5)'
     },
     text: {
-      primary: '#111111',
-      secondary: '#666666',
-      muted: '#AAAAAA',
-      inverse: '#FFFFFF',
-      link: '#1A3323',
-      linkHover: '#2D5F3F'
+      primary: 'rgb(var(--color-text-primary))',
+      secondary: 'rgb(var(--color-text-secondary))',
+      muted: 'rgb(var(--color-text-muted))',
+      inverse: 'rgb(var(--color-white))',
+      link: 'rgb(var(--color-primary-active))',
+      linkHover: 'rgb(var(--color-primary))'
     },
     border: {
-      light: '#E8E8E8',
-      medium: '#D8D8D8',
-      dark: '#AAAAAA',
-      focus: '#111111',
-      primary: '#2D5F3F'
+      light: 'rgb(var(--color-gray-200))',
+      medium: 'rgb(var(--color-gray-300))',
+      dark: 'rgb(var(--color-gray-400))',
+      focus: 'rgb(var(--color-text-primary))',
+      primary: 'rgb(var(--color-primary))'
     }
   },
   typography: {

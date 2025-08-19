@@ -28,7 +28,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             className={cn(
               'w-5 h-5 border-2 rounded transition-all duration-150 cursor-pointer flex items-center justify-center',
               checked
-                ? 'bg-[#2D5F3F] border-[#2D5F3F]'
+                ? 'bg-primary border-primary'
                 : 'bg-white border-[#E8E8E8] hover:border-[#2D5F3F]',
               disabled && 'opacity-50 cursor-not-allowed'
             )}
@@ -54,7 +54,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               <label 
                 className={cn(
                   'text-sm font-medium cursor-pointer select-none',
-                  disabled ? 'text-[#AAAAAA]' : 'text-[#111111]'
+                  disabled ? 'text-gray-400' : 'text-text-primary'
                 )}
                 onClick={() => !disabled && onChange(!checked)}
               >
@@ -64,7 +64,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             {description && (
               <p className={cn(
                 'text-xs mt-1',
-                disabled ? 'text-[#D8D8D8]' : 'text-[#666666]'
+                disabled ? 'text-gray-300' : 'text-text-secondary'
               )}>
                 {description}
               </p>

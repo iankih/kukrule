@@ -16,9 +16,9 @@ export function Spinner({ size = 'md', color = 'primary', className, ...props }:
   }
 
   const colors = {
-    primary: 'text-[#2D5F3F]',
+    primary: 'text-primary',
     white: 'text-white',
-    gray: 'text-[#AAAAAA]'
+    gray: 'text-gray-400'
   }
 
   return (

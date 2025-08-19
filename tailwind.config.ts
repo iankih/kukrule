@@ -9,11 +9,39 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'primary-main': '#2D5F3F',
-        'primary-hover': '#36503F',
-        'primary-active': '#1A3323',
-        'primary-light': '#83A58F',
-        'primary-lighter': '#73FAA4',
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary))',
+          hover: 'rgb(var(--color-primary-hover))',
+          active: 'rgb(var(--color-primary-active))',
+          light: 'rgb(var(--color-primary-light))',
+          lighter: 'rgb(var(--color-primary-lighter))',
+        },
+        secondary: {
+          DEFAULT: 'rgb(var(--color-gray-100))',
+          hover: 'rgb(var(--color-gray-200))',
+          active: 'rgb(var(--color-gray-300))',
+        },
+        success: 'rgb(var(--color-success))',
+        warning: 'rgb(var(--color-warning))',
+        error: 'rgb(var(--color-error))',
+        info: 'rgb(var(--color-info))',
+        gray: {
+          50: 'rgb(var(--color-gray-50))',
+          100: 'rgb(var(--color-gray-100))',
+          200: 'rgb(var(--color-gray-200))',
+          300: 'rgb(var(--color-gray-300))',
+          400: 'rgb(var(--color-gray-400))',
+          500: 'rgb(var(--color-gray-500))',
+          600: 'rgb(var(--color-gray-600))',
+          700: 'rgb(var(--color-gray-700))',
+          800: 'rgb(var(--color-gray-800))',
+          900: 'rgb(var(--color-gray-900))',
+        },
+        text: {
+          primary: 'rgb(var(--color-text-primary))',
+          secondary: 'rgb(var(--color-text-secondary))',
+          muted: 'rgb(var(--color-text-muted))',
+        },
       },
       fontFamily: {
         sans: ['Pretendard Variable', 'ui-sans-serif', 'system-ui', '-apple-system', 'Noto Sans', 'sans-serif'],

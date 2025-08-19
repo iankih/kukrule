@@ -21,21 +21,21 @@ export function Navbar({ className }: NavbarProps) {
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-xl font-bold text-[#2D5F3F]">kukrull</span>
+            <span className="text-xl font-bold text-primary">kukrull</span>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
+            <Link href="/" className="text-text-secondary hover:text-primary transition-colors">
               홈
             </Link>
-            <Link href="/components" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
+            <Link href="/components" className="text-text-secondary hover:text-primary transition-colors">
               컴포넌트
             </Link>
-            <Link href="/products" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
+            <Link href="/products" className="text-text-secondary hover:text-primary transition-colors">
               제품
             </Link>
-            <Link href="/about" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
+            <Link href="/about" className="text-text-secondary hover:text-primary transition-colors">
               소개
             </Link>
           </div>

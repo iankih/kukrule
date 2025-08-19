@@ -27,6 +27,12 @@ npm run lint
 npm run type-check
 ```
 
+### 색상 시스템 개발 시 주의사항
+
+1. **색상 변경 시**: `src/app/globals.css`만 수정하면 전체 프로젝트 색상이 변경됩니다
+2. **새 컴포넌트 작성 시**: 하드코딩된 색상(`bg-[#hex]`) 대신 표준 클래스(`bg-primary`) 사용
+3. **색상 테스트**: 개발 서버 실행 중 CSS 변수 값을 변경하면 실시간으로 색상이 바뀝니다
+
 ## 아키텍처
 
 ### App Router 구조
@@ -65,17 +71,89 @@ src/components/
 
 ### 디자인 시스템
 
+#### 색상 시스템 (2025.08.19 리팩토링 완료)
+
+프로젝트는 **CSS 변수 기반 색상 시스템**을 사용하여 단일 소스에서 모든 색상을 관리합니다.
+
+**현재 브랜드 색상**: Forest Green Palette (#2D5F3F)
+
+##### 색상 변경 방법
+
+```css
+/* src/app/globals.css에서 색상 변경 */
+:root {
+  --color-primary: 45 95 63;        /* #2D5F3F (Forest Green) */
+  --color-primary-hover: 54 80 63;  /* #36503F (Hover 상태) */
+  --color-primary-active: 26 51 35; /* #1A3323 (Active 상태) */
+  --color-primary-light: 131 165 143; /* #83A58F (밝은 변형) */
+  --color-primary-lighter: 115 250 164; /* #73FAA4 (가장 밝은 변형) */
+}
+```
+
+> **중요**: 색상 값은 RGB 값을 공백으로 구분하여 입력합니다 (예: `45 95 63`은 `rgb(45 95 63)`로 사용됨)
+
+##### 컴포넌트에서 사용법
+
+```tsx
+// ✅ 올바른 방법 - 표준 Tailwind 클래스 사용
+<button className="bg-primary hover:bg-primary-hover text-white">
+  버튼
+</button>
+
+// ❌ 잘못된 방법 - 하드코딩된 색상 금지
+<button className="bg-[#2D5F3F] hover:bg-[#36503F] text-white">
+  버튼
+</button>
+```
+
+##### 사용 가능한 색상 클래스
+
+**Primary Colors**:
+- `bg-primary` / `text-primary` - 기본 브랜드 색상
+- `bg-primary-hover` / `text-primary-hover` - Hover 상태
+- `bg-primary-active` / `text-primary-active` - Active 상태
+- `bg-primary-light` / `text-primary-light` - 밝은 변형
+- `bg-primary-lighter` / `text-primary-lighter` - 가장 밝은 변형
+
+**Semantic Colors**:
+- `bg-success` / `text-success` - 성공 색상
+- `bg-warning` / `text-warning` - 경고 색상  
+- `bg-error` / `text-error` - 오류 색상
+- `bg-info` / `text-info` - 정보 색상
+
+**Text Colors**:
+- `text-text-primary` - 주요 텍스트
+- `text-text-secondary` - 보조 텍스트
+- `text-text-muted` - 비활성 텍스트
+
+**Gray Scale**:
+- `bg-gray-50` ~ `bg-gray-900` - 그레이 스케일
+
+##### 색상 시스템 구조
+
+```
+src/app/globals.css          # CSS 변수 정의 (단일 진실 소스)
+├─ :root { --color-* }       # 모든 색상 변수
+│
+src/lib/theme.ts            # CSS 변수 참조
+├─ colors: { primary: 'rgb(var(--color-primary))' }
+│
+tailwind.config.ts          # Tailwind 클래스 생성
+├─ colors: { primary: 'rgb(var(--color-primary))' }
+│
+컴포넌트들                   # 표준 클래스 사용
+├─ className="bg-primary hover:bg-primary-hover"
+```
+
 #### 테마 설정
 
-* `src/lib/theme.ts`에 중앙집중식 테마 객체
-* 기본 브랜드 색상: `#19D7D2`(민트)
-* 의미 기반 컬러 팔레트 전반
+* `src/lib/theme.ts`에 중앙집중식 테마 객체 (CSS 변수 참조)
 * Pretendard Variable 폰트를 사용한 타이포그래피
 * 일관된 간격·모서리·그림자 스케일
 
 #### Tailwind 연동
 
-* `tailwind.config.ts`에 커스텀 컬러 클래스 정의
+* `tailwind.config.ts`에서 CSS 변수 기반 커스텀 클래스 자동 생성
 * `src/lib/utils.ts`의 `cn()` 유틸리티로 `clsx`·`tailwind-merge` 활용
 * 모바일 퍼스트 반응형 디자인
 

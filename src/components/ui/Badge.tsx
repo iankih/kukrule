@@ -12,9 +12,9 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     const baseStyles = 'inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full'
     
     const variants = {
-      primary: 'bg-[#1A3323] text-white',
-      secondary: 'bg-[#F7F7F7] text-[#666666]',
-      success: 'bg-[#2D5F3F] text-white'
+      primary: 'bg-primary-active text-white',
+      secondary: 'bg-gray-100 text-text-secondary',
+      success: 'bg-success text-white'
     }
 
     return (

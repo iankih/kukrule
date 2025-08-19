@@ -67,7 +67,7 @@ export function Carousel({
             <div key={item.id} className="w-full flex-shrink-0">
               <div className="p-8 md:p-12 text-center">
                 {item.image && (
-                  <div className="w-full h-48 bg-[#F7F7F7] rounded-lg mb-6 flex items-center justify-center">
+                  <div className="w-full h-48 bg-gray-100 rounded-lg mb-6 flex items-center justify-center">
 {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={item.image} 
@@ -76,10 +76,10 @@ export function Carousel({
                     />
                   </div>
                 )}
-                <h3 className="text-2xl font-semibold text-[#111111] mb-4">
+                <h3 className="text-2xl font-semibold text-text-primary mb-4">
                   {item.title}
                 </h3>
-                <p className="text-[#666666] leading-relaxed max-w-2xl mx-auto">
+                <p className="text-text-secondary leading-relaxed max-w-2xl mx-auto">
                   {item.content}
                 </p>
               </div>
@@ -120,8 +120,8 @@ export function Carousel({
               className={cn(
                 'w-2 h-2 rounded-full transition-all duration-150',
                 index === currentIndex 
-                  ? 'bg-[#2D5F3F] w-6' 
-                  : 'bg-[#D8D8D8] hover:bg-[#AAAAAA]'
+                  ? 'bg-primary w-6' 
+                  : 'bg-gray-300 hover:bg-gray-400'
               )}
             />
           ))}
