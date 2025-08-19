@@ -280,7 +280,7 @@ export default function ProductsManager() {
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       placeholder="제품명을 입력하세요"
                       required
                       disabled={isSubmitting}
@@ -294,7 +294,7 @@ export default function ProductsManager() {
                     <select
                       value={formData.category_id}
                       onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       required
                       disabled={isSubmitting}
                     >
@@ -315,7 +315,7 @@ export default function ProductsManager() {
                       type="text"
                       value={formData.manufacturer}
                       onChange={(e) => setFormData(prev => ({ ...prev, manufacturer: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       placeholder="제조사명을 입력하세요"
                       disabled={isSubmitting}
                     />
@@ -329,7 +329,7 @@ export default function ProductsManager() {
                       type="number"
                       value={formData.price}
                       onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       placeholder="가격을 입력하세요"
                       min="0"
                       step="100"
@@ -350,7 +350,7 @@ export default function ProductsManager() {
                           multiple
                           onChange={handleProductImagesUpload}
                           disabled={isSubmitting || uploadingImage}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-[#E8F0EB]"
                         />
                         <p className="text-xs text-gray-500 mt-1">여러 이미지를 한번에 선택할 수 있습니다. 첫 번째 이미지가 썸네일로 사용됩니다.</p>
                         {uploadingImage && (
@@ -362,12 +362,12 @@ export default function ProductsManager() {
                       {formData.images.length > 0 && (
                         <div>
                           <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            제품 이미지 ({formData.images.length}개) {formData.images.length > 0 && <span className="text-xs text-teal-600">• 첫 번째 이미지가 썸네일입니다</span>}
+                            제품 이미지 ({formData.images.length}개) {formData.images.length > 0 && <span className="text-xs text-[#2D5F3F]">• 첫 번째 이미지가 썸네일입니다</span>}
                           </h4>
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             {formData.images.map((imageUrl, index) => (
                               <div key={index} className="relative group">
-                                <div className={`relative ${index === 0 ? 'ring-2 ring-teal-400' : ''}`}>
+                                <div className={`relative ${index === 0 ? 'ring-2 ring-primary-400' : ''}`}>
                                   <Image
                                     src={imageUrl}
                                     alt={`제품 이미지 ${index + 1}`}
@@ -376,7 +376,7 @@ export default function ProductsManager() {
                                     className="w-24 h-24 object-cover rounded-lg border border-gray-200"
                                   />
                                   {index === 0 && (
-                                    <div className="absolute -top-1 -left-1 bg-teal-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                                    <div className="absolute -top-1 -left-1 bg-primary-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
                                       썸네일
                                     </div>
                                   )}
@@ -406,7 +406,7 @@ export default function ProductsManager() {
                       type="url"
                       value={formData.coupang_link}
                       onChange={(e) => setFormData(prev => ({ ...prev, coupang_link: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       placeholder="쿠팡 제품 링크"
                       disabled={isSubmitting}
                     />
@@ -420,7 +420,7 @@ export default function ProductsManager() {
                       type="url"
                       value={formData.naver_link}
                       onChange={(e) => setFormData(prev => ({ ...prev, naver_link: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                       placeholder="네이버 제품 링크"
                       disabled={isSubmitting}
                     />
@@ -434,7 +434,7 @@ export default function ProductsManager() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
                     placeholder="제품에 대한 설명을 입력하세요"
                     rows={4}
                     disabled={isSubmitting}

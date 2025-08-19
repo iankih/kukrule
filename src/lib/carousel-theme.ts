@@ -3,7 +3,7 @@ import { theme } from './theme'
 export const carouselThemes = {
   teal: {
     name: 'Teal (민트)',
-    primary: theme.colors.primary.main, // #19D7D2
+    primary: theme.colors.primary.main, // #2D5F3F
     light: theme.colors.primary.light,  // #EEFBFB
     lighter: theme.colors.primary.lighter, // #F7FDFD
     gradient: `linear-gradient(135deg, ${theme.colors.primary.lighter} 0%, ${theme.colors.primary.light} 50%, ${theme.colors.primary.lighter} 100%)`,

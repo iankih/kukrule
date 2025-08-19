@@ -66,7 +66,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D5F3F] mx-auto mb-4"></div>
           <p className="text-gray-600">대시보드를 불러오는 중...</p>
         </div>
       </div>
@@ -109,8 +109,8 @@ export default function AdminDashboard() {
           <Card variant="base">
             <div className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-teal-100 rounded-lg">
-                  <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 bg-[#E8F0EB] rounded-lg">
+                  <svg className="w-6 h-6 text-[#2D5F3F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>

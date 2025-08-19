@@ -1,12 +1,12 @@
 export const theme = {
   colors: {
     primary: {
-      main: '#19D7D2',
-      hover: '#00A5AA',
-      active: '#006B70',
-      light: '#EEFBFB',
-      lighter: '#F7FDFD',
-      dark: '#00A5AA'
+      main: '#2D5F3F',
+      hover: '#36503F',
+      active: '#1A3323',
+      light: '#83A58F',
+      lighter: '#73FAA4',
+      dark: '#1A3323'
     },
     neutral: {
       white: '#FFFFFF',
@@ -21,7 +21,7 @@ export const theme = {
       black: '#000000'
     },
     semantic: {
-      success: '#19D7D2',
+      success: '#2D5F3F',
       warning: '#FF9500',
       error: '#FF4757',
       info: '#5352ED'
@@ -29,7 +29,7 @@ export const theme = {
     background: {
       primary: '#FFFFFF',
       secondary: '#F7F7F7',
-      accent: '#EEFBFB',
+      accent: '#E8F0EB',
       overlay: 'rgba(0, 0, 0, 0.5)'
     },
     text: {
@@ -37,15 +37,15 @@ export const theme = {
       secondary: '#666666',
       muted: '#AAAAAA',
       inverse: '#FFFFFF',
-      link: '#00A5AA',
-      linkHover: '#19D7D2'
+      link: '#1A3323',
+      linkHover: '#2D5F3F'
     },
     border: {
       light: '#E8E8E8',
       medium: '#D8D8D8',
       dark: '#AAAAAA',
       focus: '#111111',
-      primary: '#19D7D2'
+      primary: '#2D5F3F'
     }
   },
   typography: {

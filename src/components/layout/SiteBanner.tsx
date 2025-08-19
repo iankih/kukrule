@@ -7,14 +7,14 @@ interface SiteBannerProps {
 export function SiteBanner({ className = '' }: SiteBannerProps) {
   return (
     <div className={`px-4 pt-4 pb-6 ${className}`}>
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-500 p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2D5F3F] to-[#36503F] p-8">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h2 className="text-xl font-bold mb-3 leading-tight text-white">
                 국룰에 오신 것을 환영합니다
               </h2>
-              <p className="text-base text-teal-50 leading-relaxed">
+              <p className="text-base text-white/80 leading-relaxed">
                 한국인들이 선택한 진짜 국민 아이템을 한눈에!<br />
                 검증된 제품들로 쇼핑의 새로운 기준을 제시합니다.
               </p>

@@ -59,12 +59,12 @@ export function Select({
         disabled={disabled}
         className={cn(
           'w-full px-3 py-2 text-left bg-white border rounded-lg transition-all duration-150 flex items-center justify-between',
-          'focus:outline-none focus:ring-2 focus:ring-[#19D7D2] focus:ring-opacity-20',
+          'focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] focus:ring-opacity-20',
           error 
             ? 'border-[#FF4757]' 
             : isOpen 
-              ? 'border-[#19D7D2]' 
-              : 'border-[#E8E8E8] hover:border-[#19D7D2]',
+              ? 'border-[#2D5F3F]' 
+              : 'border-[#E8E8E8] hover:border-[#2D5F3F]',
           disabled && 'bg-[#F7F7F7] cursor-not-allowed opacity-50'
         )}
       >
@@ -107,7 +107,7 @@ export function Select({
                   option.disabled
                     ? 'text-[#D8D8D8] cursor-not-allowed'
                     : option.value === value
-                      ? 'bg-[#EEFBFB] text-[#19D7D2]'
+                      ? 'bg-[#E8F0EB] text-[#2D5F3F]'
                       : 'text-[#111111] hover:bg-[#F7F7F7]'
                 )}
               >

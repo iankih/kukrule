@@ -59,7 +59,7 @@ export function Dropdown({ trigger, items, onSelect, className, align = 'left' }
                 'w-full px-4 py-2 text-left text-sm transition-colors duration-150',
                 item.disabled 
                   ? 'text-[#D8D8D8] cursor-not-allowed'
-                  : 'text-[#111111] hover:bg-[#F7F7F7] hover:text-[#19D7D2]'
+                  : 'text-[#111111] hover:bg-[#F7F7F7] hover:text-[#2D5F3F]'
               )}
             >
               {item.label}

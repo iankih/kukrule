@@ -21,21 +21,21 @@ export function Navbar({ className }: NavbarProps) {
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-xl font-bold text-[#19D7D2]">kukrull</span>
+            <span className="text-xl font-bold text-[#2D5F3F]">kukrull</span>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-[#666666] hover:text-[#19D7D2] transition-colors">
+            <Link href="/" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
               홈
             </Link>
-            <Link href="/components" className="text-[#666666] hover:text-[#19D7D2] transition-colors">
+            <Link href="/components" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
               컴포넌트
             </Link>
-            <Link href="/products" className="text-[#666666] hover:text-[#19D7D2] transition-colors">
+            <Link href="/products" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
               제품
             </Link>
-            <Link href="/about" className="text-[#666666] hover:text-[#19D7D2] transition-colors">
+            <Link href="/about" className="text-[#666666] hover:text-[#2D5F3F] transition-colors">
               소개
             </Link>
           </div>
@@ -52,7 +52,7 @@ export function Navbar({ className }: NavbarProps) {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-[#666666] hover:text-[#19D7D2] transition-colors"
+            className="md:hidden p-2 text-[#666666] hover:text-[#2D5F3F] transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,16 +69,16 @@ export function Navbar({ className }: NavbarProps) {
         {isMenuOpen && (
           <div className="md:hidden border-t border-[#F2F2F2] py-4">
             <div className="flex flex-col space-y-3">
-              <Link href="/" className="text-[#666666] hover:text-[#19D7D2] transition-colors px-1 py-2">
+              <Link href="/" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
                 홈
               </Link>
-              <Link href="/components" className="text-[#666666] hover:text-[#19D7D2] transition-colors px-1 py-2">
+              <Link href="/components" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
                 컴포넌트
               </Link>
-              <Link href="/products" className="text-[#666666] hover:text-[#19D7D2] transition-colors px-1 py-2">
+              <Link href="/products" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
                 제품
               </Link>
-              <Link href="/about" className="text-[#666666] hover:text-[#19D7D2] transition-colors px-1 py-2">
+              <Link href="/about" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
                 소개
               </Link>
               <div className="flex flex-col space-y-2 pt-3 border-t border-[#F2F2F2]">

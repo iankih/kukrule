@@ -28,8 +28,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             className={cn(
               'w-5 h-5 border-2 rounded transition-all duration-150 cursor-pointer flex items-center justify-center',
               checked
-                ? 'bg-[#19D7D2] border-[#19D7D2]'
-                : 'bg-white border-[#E8E8E8] hover:border-[#19D7D2]',
+                ? 'bg-[#2D5F3F] border-[#2D5F3F]'
+                : 'bg-white border-[#E8E8E8] hover:border-[#2D5F3F]',
               disabled && 'opacity-50 cursor-not-allowed'
             )}
             onClick={() => !disabled && onChange(!checked)}

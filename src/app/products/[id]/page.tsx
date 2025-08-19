@@ -197,10 +197,10 @@ export default function ProductDetailPage() {
                 onClick={() => router.push('/')}
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
-                <div className="w-6 h-6 text-teal-400">
+                <div className="w-6 h-6 text-orange-400">
                   ✨
                 </div>
-                <span className="text-lg font-bold text-[#19D7D2]">kukrule</span>
+                <span className="text-lg font-bold text-[#FF8A7C]">kukrule</span>
               </button>
             </div>
           </div>
@@ -217,11 +217,11 @@ export default function ProductDetailPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="궁금한 국민 아이템을 검색해 보세요"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
                 <button 
                   type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -245,7 +245,7 @@ export default function ProductDetailPage() {
               <span className="text-sm font-medium">이전</span>
             </button>
             <div className="h-4 w-px bg-gray-300"></div>
-            <span className="text-sm font-medium text-teal-500">제품 상세</span>
+            <span className="text-sm font-medium text-orange-500">제품 상세</span>
           </div>
         </div>
 
@@ -339,7 +339,7 @@ export default function ProductDetailPage() {
             <h2 className="text-lg font-bold text-gray-900 mb-3">{product.title}</h2>
             
             {/* 판매가 */}
-            <div className="text-xl font-bold text-teal-600 mb-3">
+            <div className="text-xl font-bold text-orange-600 mb-3">
               ₩{product.price?.toLocaleString()}
             </div>
             
@@ -411,7 +411,7 @@ export default function ProductDetailPage() {
                         type="text"
                         value={commentForm.author}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, author: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-gray-900 bg-white placeholder-gray-500"
                         placeholder="닉네임을 입력하세요"
                         maxLength={50}
                       />
@@ -424,7 +424,7 @@ export default function ProductDetailPage() {
                         type="password"
                         value={commentForm.password}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, password: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-gray-900 bg-white placeholder-gray-500"
                         placeholder="비밀번호를 입력하세요"
                         maxLength={20}
                       />
@@ -436,7 +436,7 @@ export default function ProductDetailPage() {
                       <textarea
                         value={commentForm.content}
                         onChange={(e) => setCommentForm(prev => ({ ...prev, content: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-xs text-gray-900 bg-white placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-gray-900 bg-white placeholder-gray-500"
                         placeholder="훈수를 남겨보세요!"
                         rows={4}
                         maxLength={1000}
@@ -483,8 +483,8 @@ export default function ProductDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         {/* 프로필 기본 아이콘 */}
-                        <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <svg className="w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                           </svg>
                         </div>
@@ -517,7 +517,7 @@ export default function ProductDetailPage() {
                             value={deletePassword}
                             onChange={(e) => setDeletePassword(e.target.value)}
                             placeholder="비밀번호 입력"
-                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-500"
+                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500"
                             maxLength={20}
                           />
                           <Button 
@@ -623,7 +623,7 @@ export default function ProductDetailPage() {
                           onClick={() => setCurrentImageIndex(index)}
                           className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                             currentImageIndex === index 
-                              ? 'border-teal-400 ring-2 ring-teal-300' 
+                              ? 'border-orange-400 ring-2 ring-orange-300' 
                               : 'border-gray-600 hover:border-gray-400'
                           }`}
                         >
@@ -648,7 +648,7 @@ export default function ProductDetailPage() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-40"
+            className="fixed bottom-6 right-6 w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-40"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />

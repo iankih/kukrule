@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'primary-main': '#19D7D2',
-        'primary-hover': '#00A5AA',
-        'primary-active': '#006B70',
-        'primary-light': '#EEFBFB',
-        'primary-lighter': '#F7FDFD',
+        'primary-main': '#2D5F3F',
+        'primary-hover': '#36503F',
+        'primary-active': '#1A3323',
+        'primary-light': '#83A58F',
+        'primary-lighter': '#73FAA4',
       },
       fontFamily: {
         sans: ['Pretendard Variable', 'ui-sans-serif', 'system-ui', '-apple-system', 'Noto Sans', 'sans-serif'],

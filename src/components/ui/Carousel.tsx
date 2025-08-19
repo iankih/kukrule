@@ -120,7 +120,7 @@ export function Carousel({
               className={cn(
                 'w-2 h-2 rounded-full transition-all duration-150',
                 index === currentIndex 
-                  ? 'bg-[#19D7D2] w-6' 
+                  ? 'bg-[#2D5F3F] w-6' 
                   : 'bg-[#D8D8D8] hover:bg-[#AAAAAA]'
               )}
             />
