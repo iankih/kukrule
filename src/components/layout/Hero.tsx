@@ -27,12 +27,12 @@ export function Hero({
       className
     )} {...props}>
       <div className="max-w-4xl mx-auto px-5 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#111111] mb-6 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-6 leading-tight">
           {title}
         </h1>
         
         {subtitle && (
-          <p className="text-lg md:text-xl text-[#666666] mb-8 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary mb-8 leading-relaxed max-w-2xl mx-auto">
             {subtitle}
           </p>
         )}

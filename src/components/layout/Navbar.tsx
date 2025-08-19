@@ -52,7 +52,7 @@ export function Navbar({ className }: NavbarProps) {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-[#666666] hover:text-[#2D5F3F] transition-colors"
+            className="md:hidden p-2 text-text-secondary hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,16 +69,16 @@ export function Navbar({ className }: NavbarProps) {
         {isMenuOpen && (
           <div className="md:hidden border-t border-[#F2F2F2] py-4">
             <div className="flex flex-col space-y-3">
-              <Link href="/" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
+              <Link href="/" className="text-text-secondary hover:text-primary transition-colors px-1 py-2">
                 홈
               </Link>
-              <Link href="/components" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
+              <Link href="/components" className="text-text-secondary hover:text-primary transition-colors px-1 py-2">
                 컴포넌트
               </Link>
-              <Link href="/products" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
+              <Link href="/products" className="text-text-secondary hover:text-primary transition-colors px-1 py-2">
                 제품
               </Link>
-              <Link href="/about" className="text-[#666666] hover:text-[#2D5F3F] transition-colors px-1 py-2">
+              <Link href="/about" className="text-text-secondary hover:text-primary transition-colors px-1 py-2">
                 소개
               </Link>
               <div className="flex flex-col space-y-2 pt-3 border-t border-[#F2F2F2]">

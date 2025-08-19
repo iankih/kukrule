@@ -109,8 +109,8 @@ export default function AdminDashboard() {
           <Card variant="base">
             <div className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-[#E8F0EB] rounded-lg">
-                  <svg className="w-6 h-6 text-[#2D5F3F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
