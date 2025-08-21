@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
 import { getProducts, getCategories, deleteProduct, createProduct, updateProduct } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
+import { getImageProps } from '@/lib/image-utils'
 
 interface ProductFormData {
   title: string
@@ -369,11 +370,13 @@ export default function ProductsManager() {
                               <div key={index} className="relative group">
                                 <div className={`relative ${index === 0 ? 'ring-2 ring-primary-400' : ''}`}>
                                   <Image
-                                    src={imageUrl}
-                                    alt={`제품 이미지 ${index + 1}`}
-                                    width={96}
-                                    height={96}
-                                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                    {...getImageProps(imageUrl, {
+                                      src: imageUrl,
+                                      alt: `제품 이미지 ${index + 1}`,
+                                      width: 96,
+                                      height: 96,
+                                      className: "w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                    })}
                                   />
                                   {index === 0 && (
                                     <div className="absolute -top-1 -left-1 bg-primary-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
@@ -499,11 +502,13 @@ export default function ProductsManager() {
                           <div className="flex-shrink-0 h-12 w-12">
                             {product.thumbnail_url ? (
                               <Image
-                                className="h-12 w-12 rounded-lg object-cover"
-                                src={product.thumbnail_url}
-                                alt={product.title}
-                                width={48}
-                                height={48}
+                                {...getImageProps(product.thumbnail_url, {
+                                  className: "h-12 w-12 rounded-lg object-cover",
+                                  src: product.thumbnail_url,
+                                  alt: product.title,
+                                  width: 48,
+                                  height: 48
+                                })}
                               />
                             ) : (
                               <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">

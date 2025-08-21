@@ -11,6 +11,7 @@ import { Footer } from '@/components/layout/Footer'
 import { getProducts, getComments, createComment, deleteComment } from '@/lib/api'
 import { Product, Comment } from '@/lib/supabase'
 import { trackProductViewOnce, trackCoupangClick, trackNaverClick } from '@/lib/analytics'
+import { getImageProps } from '@/lib/image-utils'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -269,11 +270,13 @@ export default function ProductDetailPage() {
                   return (
                     <>
                       <Image 
-                        src={currentImage} 
-                        alt={`${product.title} - 이미지 ${currentImageIndex + 1}`}
-                        width={600}
-                        height={600}
-                        className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                        {...getImageProps(currentImage, {
+                          src: currentImage,
+                          alt: `${product.title} - 이미지 ${currentImageIndex + 1}`,
+                          width: 600,
+                          height: 600,
+                          className: "w-full h-full object-contain transition-transform group-hover:scale-105"
+                        })}
                       />
                       
                       {/* 좌우 화살표 버튼 */}
@@ -583,11 +586,13 @@ export default function ProductDetailPage() {
                 {/* 메인 이미지 */}
                 <div className="flex-1 flex items-center justify-center p-4 relative">
                   <Image
-                    src={allImages[currentImageIndex]}
-                    alt={`${product.title} - 이미지 ${currentImageIndex + 1}`}
-                    width={800}
-                    height={600}
-                    className="max-w-full max-h-full object-contain"
+                    {...getImageProps(allImages[currentImageIndex], {
+                      src: allImages[currentImageIndex],
+                      alt: `${product.title} - 이미지 ${currentImageIndex + 1}`,
+                      width: 800,
+                      height: 600,
+                      className: "max-w-full max-h-full object-contain"
+                    })}
                   />
                   
                   {/* 이전/다음 버튼 */}
@@ -628,11 +633,13 @@ export default function ProductDetailPage() {
                           }`}
                         >
                           <Image
-                            src={imageUrl}
-                            alt={`제품 이미지 ${index + 1}`}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-contain"
+                            {...getImageProps(imageUrl, {
+                              src: imageUrl,
+                              alt: `제품 이미지 ${index + 1}`,
+                              width: 64,
+                              height: 64,
+                              className: "w-full h-full object-contain"
+                            })}
                           />
                         </button>
                       ))}

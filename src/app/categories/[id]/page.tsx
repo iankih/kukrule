@@ -9,6 +9,7 @@ import { Spinner } from '@/components/feedback/Spinner'
 import { Footer } from '@/components/layout/Footer'
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
+import { getImageProps } from '@/lib/image-utils'
 
 export default function CategoryPage() {
   const params = useParams()
@@ -174,11 +175,13 @@ export default function CategoryPage() {
               <div className="w-16 h-16 flex items-center justify-center">
                 {getCategoryImage(category.name) && (
                   <Image
-                    src={getCategoryImage(category.name)!}
-                    alt={category.name}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-contain"
+                    {...getImageProps(getCategoryImage(category.name)!, {
+                      src: getCategoryImage(category.name)!,
+                      alt: category.name,
+                      width: 64,
+                      height: 64,
+                      className: "w-full h-full object-contain"
+                    })}
                   />
                 )}
               </div>
@@ -212,11 +215,13 @@ export default function CategoryPage() {
                         
                         return thumbnailUrl ? (
                           <Image 
-                            src={thumbnailUrl} 
-                            alt={product.title}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-contain"
+                            {...getImageProps(thumbnailUrl, {
+                              src: thumbnailUrl,
+                              alt: product.title,
+                              width: 64,
+                              height: 64,
+                              className: "w-full h-full object-contain"
+                            })}
                           />
                         ) : (
                           <span className="text-gray-400 text-sm">제품</span>

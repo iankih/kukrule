@@ -11,6 +11,7 @@ import { SiteBanner } from '@/components/layout/SiteBanner'
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
 import { getCarouselTheme } from '@/lib/carousel-theme'
+import { getImageProps } from '@/lib/image-utils'
 
 export default function HomePage() {
   const router = useRouter()
@@ -471,11 +472,13 @@ export default function HomePage() {
                             
                             return thumbnailUrl ? (
                               <Image 
-                                src={thumbnailUrl} 
-                                alt={product.title}
-                                width={64}
-                                height={64}
-                                className="w-full h-full object-contain"
+                                {...getImageProps(thumbnailUrl, {
+                                  src: thumbnailUrl,
+                                  alt: product.title,
+                                  width: 64,
+                                  height: 64,
+                                  className: "w-full h-full object-contain"
+                                })}
                               />
                             ) : (
                               <span className="text-gray-400 text-sm">제품</span>
@@ -581,11 +584,13 @@ export default function HomePage() {
                                   <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
                                     {item.image ? (
                                       <Image 
-                                        src={item.image} 
-                                        alt={`캐러셀 ${item.id} 이미지`}
-                                        width={96}
-                                        height={128}
-                                        className="w-full h-full object-contain"
+                                        {...getImageProps(item.image, {
+                                          src: item.image,
+                                          alt: `캐러셀 ${item.id} 이미지`,
+                                          width: 96,
+                                          height: 128,
+                                          className: "w-full h-full object-contain"
+                                        })}
                                       />
                                     ) : (
                                       <span className="text-sm text-gray-400">제품</span>
@@ -852,11 +857,13 @@ export default function HomePage() {
                           
                           return thumbnailUrl ? (
                             <Image 
-                              src={thumbnailUrl} 
-                              alt={product.title}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-contain"
+                              {...getImageProps(thumbnailUrl, {
+                                src: thumbnailUrl,
+                                alt: product.title,
+                                width: 64,
+                                height: 64,
+                                className: "w-full h-full object-contain"
+                              })}
                             />
                           ) : (
                             <span className="text-gray-400 text-sm">제품</span>
