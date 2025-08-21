@@ -514,32 +514,30 @@ export default function ProductDetailPage() {
                       
                       {/* 댓글 삭제 */}
                       {deletingCommentId === comment.id ? (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1.5">
                           <input
                             type="password"
                             value={deletePassword}
                             onChange={(e) => setDeletePassword(e.target.value)}
-                            placeholder="비밀번호 입력"
-                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
+                            placeholder="비밀번호"
+                            className="px-2 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary text-gray-900 bg-white placeholder-gray-500 w-20"
                             maxLength={20}
                           />
-                          <Button 
-                            variant="primary" 
-                            size="sm" 
+                          <button 
+                            className="px-2 py-0.5 bg-primary text-white rounded text-xs hover:bg-primary-hover transition-colors"
                             onClick={() => handleCommentDelete(comment.id)}
                           >
                             삭제
-                          </Button>
-                          <Button 
-                            variant="secondary" 
-                            size="sm" 
+                          </button>
+                          <button 
+                            className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300 transition-colors"
                             onClick={() => {
                               setDeletingCommentId(null)
                               setDeletePassword('')
                             }}
                           >
                             취소
-                          </Button>
+                          </button>
                         </div>
                       ) : (
                         <button 
