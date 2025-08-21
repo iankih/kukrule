@@ -364,7 +364,7 @@ export default function CarouselManager() {
                 <button
                   onClick={handleToggleCarousel}
                   disabled={isToggling}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] focus:ring-offset-2 ${
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                     carouselEnabled ? 'bg-[#2D5F3F]' : 'bg-gray-200'
                   }`}
                 >
@@ -475,7 +475,7 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
                           제목
                         </label>
                         <textarea
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] focus:border-transparent text-gray-900"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                           rows={3}
                           value={item.title}
                           onChange={(e) => handleTitleChange(item.id, e.target.value)}
@@ -489,7 +489,7 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] focus:border-transparent text-gray-900"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                           value={item.subtitle}
                           onChange={(e) => handleSubtitleChange(item.id, e.target.value)}
                           placeholder="캐러셀 부제목을 입력하세요"
@@ -620,7 +620,7 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
                           배경 색상 테마
                         </label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] focus:border-transparent text-gray-900"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                           value={item.color}
                           onChange={(e) => handleColorChange(item.id, e.target.value)}
                         >

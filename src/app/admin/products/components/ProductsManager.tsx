@@ -281,7 +281,7 @@ export default function ProductsManager() {
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       placeholder="제품명을 입력하세요"
                       required
                       disabled={isSubmitting}
@@ -295,7 +295,7 @@ export default function ProductsManager() {
                     <select
                       value={formData.category_id}
                       onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       required
                       disabled={isSubmitting}
                     >
@@ -316,7 +316,7 @@ export default function ProductsManager() {
                       type="text"
                       value={formData.manufacturer}
                       onChange={(e) => setFormData(prev => ({ ...prev, manufacturer: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       placeholder="제조사명을 입력하세요"
                       disabled={isSubmitting}
                     />
@@ -330,7 +330,7 @@ export default function ProductsManager() {
                       type="number"
                       value={formData.price}
                       onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       placeholder="가격을 입력하세요"
                       min="0"
                       step="100"
@@ -409,7 +409,7 @@ export default function ProductsManager() {
                       type="url"
                       value={formData.coupang_link}
                       onChange={(e) => setFormData(prev => ({ ...prev, coupang_link: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       placeholder="쿠팡 제품 링크"
                       disabled={isSubmitting}
                     />
@@ -423,7 +423,7 @@ export default function ProductsManager() {
                       type="url"
                       value={formData.naver_link}
                       onChange={(e) => setFormData(prev => ({ ...prev, naver_link: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                       placeholder="네이버 제품 링크"
                       disabled={isSubmitting}
                     />
@@ -437,7 +437,7 @@ export default function ProductsManager() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5F3F] text-gray-900 bg-white placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
                     placeholder="제품에 대한 설명을 입력하세요"
                     rows={4}
                     disabled={isSubmitting}

@@ -195,6 +195,19 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </Card>
+
+          <Card variant="base">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">사이트 배너 관리</h3>
+              <p className="text-gray-600 mb-4">메인 페이지 배너 이미지 및 텍스트 관리</p>
+              <Button
+                variant="primary"
+                onClick={() => router.push('/admin/banner')}
+              >
+                배너 관리하기
+              </Button>
+            </div>
+          </Card>
         </div>
 
         {/* 최근 제품 목록 */}

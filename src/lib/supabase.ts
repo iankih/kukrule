@@ -41,3 +41,13 @@ export interface Comment {
   password_hash: string
   created_at: string
 }
+
+export interface SiteBanner {
+  id: number
+  title: string
+  subtitle: string
+  background_image: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}

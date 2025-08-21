@@ -1,4 +1,4 @@
-import { Category, Product, Comment } from './supabase'
+import { Category, Product, Comment, SiteBanner } from './supabase'
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://your-domain.com' 
@@ -197,6 +197,49 @@ export async function getProduct(productId: string) {
   
   if (!response.ok || !data.success) {
     throw new Error(data.error || 'Failed to fetch product')
+  }
+  
+  return data.data
+}
+
+// Site Banner API
+export async function getSiteBanner(): Promise<SiteBanner> {
+  const response = await fetch(`${API_BASE_URL}/api/site-banner`)
+  
+  if (!response.ok) {
+    throw new Error('사이트 배너 정보를 가져오는데 실패했습니다.')
+  }
+  
+  const data: ApiResponse<SiteBanner> = await response.json()
+  
+  if (!data.success) {
+    throw new Error(data.error || '사이트 배너 정보를 가져오는데 실패했습니다.')
+  }
+  
+  return data.data
+}
+
+export async function updateSiteBanner(banner: {
+  title: string
+  subtitle: string
+  background_image?: string | null
+}): Promise<SiteBanner> {
+  const response = await fetch(`${API_BASE_URL}/api/site-banner`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(banner),
+  })
+  
+  if (!response.ok) {
+    throw new Error('사이트 배너 업데이트에 실패했습니다.')
+  }
+  
+  const data: ApiResponse<SiteBanner> = await response.json()
+  
+  if (!data.success) {
+    throw new Error(data.error || '사이트 배너 업데이트에 실패했습니다.')
   }
   
   return data.data

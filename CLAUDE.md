@@ -345,3 +345,8 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
 2. **데이터 조회**: `execute_sql`로 복잡한 쿼리 실행
 3. **백업 전략**: 중요한 변경 전 데이터 백업 확인
 4. **에러 처리**: MCP 실행 실패 시 대체 방안 준비
+
+## 기타
+1. github cli가 설치 및 인증되었음.
+2. 개발서버는 사용자가 직접 실행할 것이므로 별도의 지시가 없는한 니가 실행하지말것.
+3. 깃 커밋 및 푸시는 지시가 있을때만 할 것.
