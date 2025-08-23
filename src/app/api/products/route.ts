@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { requireAdminAuth } from '@/lib/auth'
+import { createClient } from '@supabase/supabase-js'
+
+// 관리자용 Supabase 클라이언트 (Service Role 사용)
+const adminSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,10 +76,15 @@ export async function GET(request: NextRequest) {
 // 관리자용 제품 생성 API
 export async function POST(request: NextRequest) {
   try {
+    console.log('POST /api/products - Starting product creation')
+    
     // 관리자 인증 확인
     await requireAdminAuth()
+    console.log('POST /api/products - Admin auth passed')
 
     const body = await request.json()
+    console.log('POST /api/products - Request body:', body)
+    
     const { title, description, category_id, manufacturer, price, thumbnail_url, images, coupang_link, naver_link } = body
     
     // 필수 필드 검증
@@ -94,8 +106,10 @@ export async function POST(request: NextRequest) {
       coupang_link,
       naver_link
     }
+    
+    console.log('POST /api/products - Product data to insert:', productData)
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from('products')
       .insert([productData])
       .select(`
@@ -105,6 +119,8 @@ export async function POST(request: NextRequest) {
           name
         )
       `)
+      
+    console.log('POST /api/products - Supabase response:', { data, error })
 
     if (error) {
       console.error('Error creating product:', error)

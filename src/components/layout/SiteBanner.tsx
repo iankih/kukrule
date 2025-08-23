@@ -43,15 +43,10 @@ export function SiteBanner({ className = '' }: SiteBannerProps) {
     return (
       <div className={`px-4 pt-4 pb-6 ${className}`}>
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary-hover p-8 animate-pulse">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="h-6 bg-white/20 rounded mb-3 w-3/4"></div>
-              <div className="h-4 bg-white/20 rounded mb-2 w-full"></div>
-              <div className="h-4 bg-white/20 rounded w-2/3"></div>
-            </div>
-            <div className="flex-shrink-0 ml-6">
-              <div className="w-24 h-32 rounded-lg bg-white/20"></div>
-            </div>
+          <div>
+            <div className="h-6 bg-white/20 rounded mb-3 w-3/4"></div>
+            <div className="h-4 bg-white/20 rounded mb-2 w-full"></div>
+            <div className="h-4 bg-white/20 rounded w-2/3"></div>
           </div>
         </div>
       </div>
@@ -86,31 +81,19 @@ export function SiteBanner({ className = '' }: SiteBannerProps) {
                   {bannerData.subtitle}
                 </p>
               </div>
-              <div className="flex-shrink-0 ml-6">
-                <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
-                  <div className="text-4xl">🏆</div>
-                </div>
-              </div>
             </div>
           </div>
         ) : (
           // 기본 그라데이션 배경
           <div className="bg-gradient-to-r from-primary to-primary-hover p-8">
             <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-3 leading-tight text-white">
-                    {bannerData.title}
-                  </h2>
-                  <p className="text-base text-white/80 leading-relaxed whitespace-pre-line">
-                    {bannerData.subtitle}
-                  </p>
-                </div>
-                <div className="flex-shrink-0 ml-6">
-                  <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
-                    <div className="text-4xl">🏆</div>
-                  </div>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold mb-3 leading-tight text-white">
+                  {bannerData.title}
+                </h2>
+                <p className="text-base text-white/80 leading-relaxed whitespace-pre-line">
+                  {bannerData.subtitle}
+                </p>
               </div>
             </div>
             

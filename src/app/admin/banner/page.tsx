@@ -174,29 +174,17 @@ export default function BannerManagementPage() {
                         {formData.subtitle}
                       </p>
                     </div>
-                    <div className="flex-shrink-0 ml-6">
-                      <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
-                        <div className="text-4xl">🏆</div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-primary to-primary-hover p-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-bold mb-3 leading-tight text-white">
-                        {formData.title}
-                      </h2>
-                      <p className="text-base text-white/80 leading-relaxed whitespace-pre-line">
-                        {formData.subtitle}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0 ml-6">
-                      <div className="w-24 h-32 rounded-lg flex items-center justify-center bg-white/20 overflow-hidden">
-                        <div className="text-4xl">🏆</div>
-                      </div>
-                    </div>
+                  <div>
+                    <h2 className="text-xl font-bold mb-3 leading-tight text-white">
+                      {formData.title}
+                    </h2>
+                    <p className="text-base text-white/80 leading-relaxed whitespace-pre-line">
+                      {formData.subtitle}
+                    </p>
                   </div>
                 </div>
               )}

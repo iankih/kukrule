@@ -3,13 +3,20 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
 import { getProducts, getCategories, deleteProduct, createProduct, updateProduct } from '@/lib/api'
-import { Product, Category } from '@/lib/supabase'
+import { Product, Category, MentionLink } from '@/lib/supabase'
 import { getImageProps } from '@/lib/image-utils'
+
+// 마크다운 에디터 동적 로드 (클라이언트 사이드만)
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  { ssr: false }
+)
 
 interface ProductFormData {
   title: string
@@ -18,6 +25,7 @@ interface ProductFormData {
   manufacturer: string
   price: string
   images: string[]
+  mention_links: MentionLink[]
   coupang_link: string
   naver_link: string
 }
@@ -40,6 +48,7 @@ export default function ProductsManager() {
     manufacturer: '',
     price: '',
     images: [],
+    mention_links: [],
     coupang_link: '',
     naver_link: ''
   })
@@ -84,6 +93,7 @@ export default function ProductsManager() {
         price: formData.price ? parseFloat(formData.price) : undefined,
         thumbnail_url: formData.images.length > 0 ? formData.images[0] : undefined,
         images: formData.images,
+        mention_links: formData.mention_links.length > 0 ? formData.mention_links : undefined,
         coupang_link: formData.coupang_link || undefined,
         naver_link: formData.naver_link || undefined
       }
@@ -102,7 +112,18 @@ export default function ProductsManager() {
 
     } catch (error) {
       console.error('Submit error:', error)
-      alert(error instanceof Error ? error.message : '처리 중 오류가 발생했습니다.')
+      let errorMessage = '처리 중 오류가 발생했습니다.'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          formData
+        })
+      }
+      
+      alert(`오류 발생: ${errorMessage}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -123,6 +144,7 @@ export default function ProductsManager() {
       manufacturer: product.manufacturer || '',
       price: product.price?.toString() || '',
       images: allImages,
+      mention_links: product.mention_links || [],
       coupang_link: product.coupang_link || '',
       naver_link: product.naver_link || ''
     })
@@ -216,11 +238,40 @@ export default function ProductsManager() {
       manufacturer: '',
       price: '',
       images: [],
+      mention_links: [],
       coupang_link: '',
       naver_link: ''
     })
     setEditingProduct(null)
     setIsFormOpen(false)
+  }
+
+  // 언급 링크 관리 함수들
+  const addMentionLink = () => {
+    if (formData.mention_links.length >= 5) {
+      alert('최대 5개까지 링크를 추가할 수 있습니다.')
+      return
+    }
+    setFormData(prev => ({
+      ...prev,
+      mention_links: [...prev.mention_links, { title: '', url: '' }]
+    }))
+  }
+
+  const updateMentionLink = (index: number, field: 'title' | 'url', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      mention_links: prev.mention_links.map((link, i) => 
+        i === index ? { ...link, [field]: value } : link
+      )
+    }))
+  }
+
+  const removeMentionLink = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      mention_links: prev.mention_links.filter((_, i) => i !== index)
+    }))
   }
 
   if (isLoading) {
@@ -430,18 +481,99 @@ export default function ProductsManager() {
                   </div>
                 </div>
 
+                {/* 언급 링크 섹션 */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      이 제품이 언급된 링크 (최대 5개)
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={addMentionLink}
+                      disabled={isSubmitting || formData.mention_links.length >= 5}
+                    >
+                      + 링크 추가
+                    </Button>
+                  </div>
+                  
+                  {formData.mention_links.length === 0 ? (
+                    <div className="text-sm text-gray-500 py-4 text-center border border-dashed border-gray-300 rounded-lg">
+                      제품이 소개된 블로그, 리뷰 사이트 등의 링크를 추가해보세요
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {formData.mention_links.map((link, index) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-2 p-3 border border-gray-200 rounded-lg">
+                          <div className="md:col-span-2">
+                            <input
+                              type="text"
+                              value={link.title}
+                              onChange={(e) => updateMentionLink(index, 'title', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm text-gray-900 bg-white placeholder-gray-500"
+                              placeholder="사이트 설명 (예: 네이버 블로그)"
+                              disabled={isSubmitting}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <input
+                              type="url"
+                              value={link.url}
+                              onChange={(e) => updateMentionLink(index, 'url', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm text-gray-900 bg-white placeholder-gray-500"
+                              placeholder="https://..."
+                              disabled={isSubmitting}
+                            />
+                          </div>
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => removeMentionLink(index)}
+                              disabled={isSubmitting}
+                              className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
+                              title="링크 삭제"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     제품 설명
                   </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 bg-white placeholder-gray-500"
-                    placeholder="제품에 대한 설명을 입력하세요"
-                    rows={4}
-                    disabled={isSubmitting}
-                  />
+                  
+                  {/* 설명 가이드 */}
+                  <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-sm text-green-800">
+                      <h4 className="font-semibold mb-2">📝 마크다운으로 이미지 삽입 방법</h4>
+                      <div className="space-y-2 text-xs">
+                        <p><strong>이미지 삽입:</strong> <code>![이미지 설명](이미지URL)</code></p>
+                        <p><strong>이미지 업로드:</strong> 위의 "제품 이미지"에서 업로드 후 URL 복사해서 사용</p>
+                        <p><strong>텍스트 서식:</strong> <code>**굵게**</code>, <code>*기울임*</code>, <code>### 제목</code></p>
+                        <p><strong>리스트:</strong> <code>- 항목1</code>, <code>1. 번호 리스트</code></p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border border-gray-300 rounded-lg overflow-hidden">
+                    <MDEditor
+                      value={formData.description}
+                      onChange={(value) => setFormData(prev => ({ ...prev, description: value || '' }))}
+                      preview="edit"
+                      hideToolbar={false}
+                      data-color-mode="light"
+                      height={200}
+                      style={{
+                        backgroundColor: 'white',
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex space-x-4">

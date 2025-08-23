@@ -8,10 +8,18 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
 import { Footer } from '@/components/layout/Footer'
-import { getProducts, getComments, createComment, deleteComment } from '@/lib/api'
-import { Product, Comment } from '@/lib/supabase'
+import { getProducts, getComments, createComment, deleteComment, getContentBlocks } from '@/lib/api'
+import { Product, Comment, ContentBlock } from '@/lib/supabase'
+import { ContentBlockRenderer } from '@/components/ui/ContentBlockRenderer'
 import { trackProductViewOnce, trackCoupangClick, trackNaverClick } from '@/lib/analytics'
 import { getImageProps } from '@/lib/image-utils'
+import dynamic from 'next/dynamic'
+
+// 마크다운 프리뷰 동적 로드
+const MarkdownPreview = dynamic(
+  () => import('@uiw/react-markdown-preview'),
+  { ssr: false }
+)
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -20,6 +28,7 @@ export default function ProductDetailPage() {
   
   const [product, setProduct] = useState<Product | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -27,6 +36,10 @@ export default function ProductDetailPage() {
   // 이미지 갤러리 상태
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageGalleryOpen, setIsImageGalleryOpen] = useState(false)
+  
+  // 스와이프 상태
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
   
   // 댓글 작성 폼 상태
   const [isCommentFormOpen, setIsCommentFormOpen] = useState(false)
@@ -62,9 +75,13 @@ export default function ProductDetailPage() {
         // 제품 조회수 추적 (한 번만)
         trackProductViewOnce(productId)
         
-        // 댓글도 함께 가져오기
-        const commentsData = await getComments(productId)
+        // 댓글과 콘텐츠 블록도 함께 가져오기
+        const [commentsData, contentBlocksData] = await Promise.all([
+          getComments(productId),
+          getContentBlocks(productId)
+        ])
         setComments(commentsData)
+        setContentBlocks(contentBlocksData)
         
       } catch (err) {
         setError(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다.')
@@ -156,6 +173,33 @@ export default function ProductDetailPage() {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  // 스와이프 핸들러
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = (allImages: string[]) => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe && currentImageIndex < allImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1)
+    }
+    if (isRightSwipe && currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1)
     }
   }
 
@@ -252,11 +296,20 @@ export default function ProductDetailPage() {
 
         {/* 제품 정보 */}
         <div className="p-4">
-          <div className="bg-white p-4 mb-6">
+          <div className="bg-white px-4 py-4 mb-6">
             {/* 제품 이미지 갤러리 */}
             <div className="mb-4">
               {/* 메인 이미지 */}
-              <div className="relative w-full bg-white rounded-lg overflow-hidden mb-3 group cursor-pointer border border-gray-200" onClick={() => setIsImageGalleryOpen(true)}>
+              <div 
+                className="relative w-full bg-white rounded-lg overflow-hidden mb-3 group cursor-pointer border border-gray-200" 
+                onClick={() => setIsImageGalleryOpen(true)}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={() => {
+                  const allImages = (product.images && product.images.length > 0) ? product.images : (product.thumbnail_url ? [product.thumbnail_url] : [])
+                  onTouchEnd(allImages)
+                }}
+              >
                 <div className="w-full pb-[100%]"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                 {(() => {
@@ -275,8 +328,8 @@ export default function ProductDetailPage() {
                           alt: `${product.title} - 이미지 ${currentImageIndex + 1}`,
                           width: 600,
                           height: 600,
-                          className: "w-full h-full object-contain transition-transform group-hover:scale-105"
-                        })}
+                          className: "w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
+                        }, { priority: currentImageIndex === 0 })}
                       />
                       
                       {/* 좌우 화살표 버튼 */}
@@ -319,67 +372,108 @@ export default function ProductDetailPage() {
               </div>
             </div>
             
-            {/* 카테고리 및 제조사 정보 */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              {product.categories?.name && (
-                <Badge variant="primary">
-                  카테고리: {product.categories.name}
-                </Badge>
-              )}
-              {product.manufacturer && (
-                <Badge variant="secondary">
-                  제조사: {product.manufacturer}
-                </Badge>
-              )}
-              {!product.categories?.name && !product.manufacturer && (
-                <Badge variant="secondary">
-                  미분류
-                </Badge>
-              )}
-            </div>
+            {/* 카테고리 */}
+            {product.categories?.name && (
+              <div className="text-sm text-gray-600 mb-3">
+                {product.categories.name}
+              </div>
+            )}
+            
+            {/* 제조사명 */}
+            {product.manufacturer && (
+              <div className="text-sm text-gray-500 mb-1">
+                {product.manufacturer}
+              </div>
+            )}
             
             {/* 제품명 */}
-            <h2 className="text-lg font-bold text-gray-900 mb-3">{product.title}</h2>
+            <h2 className="text-base font-medium text-gray-900 mb-2">{product.title}</h2>
             
             {/* 판매가 */}
-            <div className="text-xl font-bold text-primary mb-3">
+            <div className="text-xl font-bold text-primary mb-4">
               ₩{product.price?.toLocaleString()}
             </div>
             
             {/* 링크 */}
-            <div className="flex space-x-2 mb-4">
+            <div className="flex space-x-3 mb-4">
               {product.coupang_link && (
-                <Button 
-                  variant="primary" 
-                  size="sm"
+                <button
                   onClick={() => {
                     trackCoupangClick(productId)
                     window.open(product.coupang_link!, '_blank')
                   }}
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white font-medium rounded-lg transition-colors text-sm"
                 >
                   쿠팡에서 보기
-                </Button>
+                </button>
               )}
               {product.naver_link && (
-                <Button 
-                  variant="secondary" 
-                  size="sm"
+                <button
                   onClick={() => {
                     trackNaverClick(productId)
                     window.open(product.naver_link!, '_blank')
                   }}
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white font-medium rounded-lg transition-colors text-sm"
                 >
                   네이버에서 보기
-                </Button>
+                </button>
               )}
             </div>
             
+            {/* 언급 링크 */}
+            {product.mention_links && product.mention_links.length > 0 && (
+              <div className="border-t border-gray-100 pt-3 pb-3">
+                <h3 className="text-xs font-semibold text-gray-700 mb-2">이 제품이 언급된 링크</h3>
+                <div className="space-y-2">
+                  {product.mention_links.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex-shrink-0">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium text-gray-900 block truncate">
+                          {link.title}
+                        </span>
+                        <span className="text-xs text-gray-500 block truncate">
+                          {link.url}
+                        </span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {/* 설명 */}
             <div className="border-t border-gray-100 pt-3">
-              <h3 className="text-xs font-semibold text-gray-700 mb-2">제품 설명</h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                {product.description}
-              </p>
+              <h3 className="text-xs font-semibold text-gray-700 mb-3">제품 설명</h3>
+              
+              {/* 콘텐츠 블록 렌더링 */}
+              {contentBlocks.length > 0 ? (
+                <ContentBlockRenderer 
+                  blocks={contentBlocks} 
+                  className="space-y-4"
+                />
+              ) : (
+                /* 마크다운 또는 기본 텍스트 설명 (호환성) */
+                product.description && (
+                  <div className="prose prose-sm max-w-none">
+                    <MarkdownPreview
+                      source={product.description}
+                      style={{ backgroundColor: 'transparent', fontSize: '0.875rem' }}
+                      data-color-mode="light"
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
 
@@ -387,18 +481,17 @@ export default function ProductDetailPage() {
           <div className="border-t border-gray-200 my-6"></div>
 
           {/* 댓글 섹션 */}
-          <div className="mb-6">
+          <div className="mb-6 px-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900">
                 훈수 두기 ({comments.length})
               </h3>
-              <Button 
-                variant="primary" 
-                size="sm"
+              <button
                 onClick={() => setIsCommentFormOpen(true)}
+                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-xs"
               >
                 훈수 남기기
-              </Button>
+              </button>
             </div>
 
             {/* 댓글 작성 폼 */}
@@ -482,15 +575,9 @@ export default function ProductDetailPage() {
               <div className="bg-white rounded-xl overflow-hidden">
                 {comments.map((comment, index) => (
                   <Card key={comment.id} variant="comment" className={index === comments.length - 1 ? 'border-b-0' : ''}>
-                    {/* 상단: 프로필 아이콘, 닉네임, 날짜 */}
+                    {/* 상단: 닉네임, 날짜 */}
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        {/* 프로필 기본 아이콘 */}
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                          <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                        </div>
+                      <div>
                         {/* 닉네임 */}
                         <span className="text-xs font-semibold text-gray-900">{comment.author}</span>
                       </div>
@@ -506,8 +593,8 @@ export default function ProductDetailPage() {
                       </span>
                     </div>
                     
-                    {/* 본문: 닉네임 영역 아래에 표시 */}
-                    <div className="ml-13">
+                    {/* 본문 */}
+                    <div>
                       <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">
                         {comment.content}
                       </p>
@@ -582,14 +669,19 @@ export default function ProductDetailPage() {
                 </div>
                 
                 {/* 메인 이미지 */}
-                <div className="flex-1 flex items-center justify-center p-4 relative">
+                <div 
+                  className="flex-1 flex items-center justify-center p-4 relative"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={() => onTouchEnd(allImages)}
+                >
                   <Image
                     {...getImageProps(allImages[currentImageIndex], {
                       src: allImages[currentImageIndex],
                       alt: `${product.title} - 이미지 ${currentImageIndex + 1}`,
                       width: 800,
                       height: 600,
-                      className: "max-w-full max-h-full object-contain"
+                      className: "max-w-full max-h-full object-contain transition-all duration-300"
                     })}
                   />
                   

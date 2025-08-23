@@ -21,23 +21,28 @@ export function isGifImage(src: string): boolean {
  * GIF 파일인지 확인하여 Next.js Image 컴포넌트 props를 반환
  * @param src 이미지 URL 또는 경로
  * @param baseProps 기본 Image props
+ * @param options 추가 옵션 (priority 여부 등)
  * @returns GIF이면 unoptimized가 추가된 props, 아니면 기본 props
  */
 export function getImageProps<T extends Record<string, any>>(
   src: string,
-  baseProps: T
-): T & { unoptimized?: boolean } {
+  baseProps: T,
+  options?: { priority?: boolean }
+): T & { unoptimized?: boolean; priority?: boolean } {
   // 브라우저 환경이 아니면 기본 props 반환
   if (typeof window === 'undefined') {
     return baseProps
   }
   
+  const result = { ...baseProps }
+  
   if (isGifImage(src)) {
-    return {
-      ...baseProps,
-      unoptimized: true
-    }
+    result.unoptimized = true
   }
   
-  return baseProps
+  if (options?.priority) {
+    result.priority = true
+  }
+  
+  return result
 }

@@ -1,4 +1,4 @@
-import { Category, Product, Comment, SiteBanner } from './supabase'
+import { Category, Product, Comment, SiteBanner, ContentBlock } from './supabase'
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://your-domain.com' 
@@ -141,10 +141,18 @@ export async function createProduct(productData: {
     body: JSON.stringify(productData),
   })
   
-  const data: ApiResponse<Product> = await response.json()
+  let data: ApiResponse<Product>
+  try {
+    data = await response.json()
+  } catch (jsonError) {
+    console.error('JSON parsing error:', jsonError)
+    throw new Error(`서버 응답 파싱 오류 (HTTP ${response.status}): ${response.statusText}`)
+  }
+  
+  console.log('Product creation response:', { status: response.status, data })
   
   if (!response.ok || !data.success) {
-    throw new Error(data.error || 'Failed to create product')
+    throw new Error(data.error || `HTTP ${response.status}: Failed to create product`)
   }
   
   return data.data
@@ -240,6 +248,36 @@ export async function updateSiteBanner(banner: {
   
   if (!data.success) {
     throw new Error(data.error || '사이트 배너 업데이트에 실패했습니다.')
+  }
+  
+  return data.data
+}
+
+// Content Blocks API
+export async function getContentBlocks(productId: string): Promise<ContentBlock[]> {
+  const response = await fetch(`${API_BASE_URL}/api/content-blocks/${productId}`)
+  const data: ApiResponse<ContentBlock[]> = await response.json()
+  
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Failed to fetch content blocks')
+  }
+  
+  return data.data
+}
+
+export async function updateContentBlocks(productId: string, blocks: Omit<ContentBlock, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]): Promise<ContentBlock[]> {
+  const response = await fetch(`${API_BASE_URL}/api/content-blocks/${productId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ blocks }),
+  })
+  
+  const data: ApiResponse<ContentBlock[]> = await response.json()
+  
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Failed to update content blocks')
   }
   
   return data.data

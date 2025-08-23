@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { requireAdminAuth } from '@/lib/auth'
+import { createClient } from '@supabase/supabase-js'
+
+// 관리자용 Supabase 클라이언트 (Service Role 사용)
+const adminSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 // 개별 제품 조회
 export async function GET(
@@ -77,7 +84,7 @@ export async function PUT(
       updated_at: new Date().toISOString()
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from('products')
       .update(updateData)
       .eq('id', id)
@@ -137,7 +144,7 @@ export async function DELETE(
     const { id } = await params
 
     // 제품에 연결된 댓글들도 함께 삭제
-    const { error: commentsError } = await supabase
+    const { error: commentsError } = await adminSupabase
       .from('comments')
       .delete()
       .eq('product_id', id)
@@ -148,7 +155,7 @@ export async function DELETE(
     }
 
     // 제품 삭제
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('products')
       .delete()
       .eq('id', id)
