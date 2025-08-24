@@ -232,25 +232,35 @@ export async function updateSiteBanner(banner: {
   subtitle: string
   background_image?: string | null
 }): Promise<SiteBanner> {
-  const response = await fetch(`${API_BASE_URL}/api/site-banner`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(banner),
-  })
-  
-  if (!response.ok) {
-    throw new Error('사이트 배너 업데이트에 실패했습니다.')
+  try {
+    console.log('API 요청 데이터:', banner)
+    
+    const response = await fetch(`${API_BASE_URL}/api/site-banner`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(banner),
+    })
+    
+    console.log('API 응답 상태:', response.status, response.statusText)
+    
+    const data: ApiResponse<SiteBanner> = await response.json()
+    console.log('API 응답 데이터:', data)
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}: 사이트 배너 업데이트에 실패했습니다.`)
+    }
+    
+    if (!data.success) {
+      throw new Error(data.error || '사이트 배너 업데이트에 실패했습니다.')
+    }
+    
+    return data.data
+  } catch (error) {
+    console.error('updateSiteBanner 오류:', error)
+    throw error
   }
-  
-  const data: ApiResponse<SiteBanner> = await response.json()
-  
-  if (!data.success) {
-    throw new Error(data.error || '사이트 배너 업데이트에 실패했습니다.')
-  }
-  
-  return data.data
 }
 
 // Content Blocks API
