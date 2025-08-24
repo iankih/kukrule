@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/feedback/Spinner'
-import { Footer } from '@/components/layout/Footer'
+// Footer 동적 로드
+const Footer = dynamic(() => import('@/components/layout/Footer').then(mod => ({ default: mod.Footer })), {
+  loading: () => <div className="bg-gray-100 h-32" />
+})
 import { getProducts, getComments, createComment, deleteComment, getContentBlocks } from '@/lib/api'
 import { Product, Comment, ContentBlock } from '@/lib/supabase'
 import { ContentBlockRenderer } from '@/components/ui/ContentBlockRenderer'

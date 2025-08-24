@@ -6,8 +6,16 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/feedback/Spinner'
-import { Footer } from '@/components/layout/Footer'
-import { SiteBanner } from '@/components/layout/SiteBanner'
+import dynamic from 'next/dynamic'
+
+// 무거운 컴포넌트들을 동적 로드
+const Footer = dynamic(() => import('@/components/layout/Footer').then(mod => ({ default: mod.Footer })), {
+  loading: () => <div className="bg-gray-100 h-32" />
+})
+
+const SiteBanner = dynamic(() => import('@/components/layout/SiteBanner').then(mod => ({ default: mod.SiteBanner })), {
+  loading: () => <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-32" />
+})
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/lib/supabase'
 import { getCarouselTheme } from '@/lib/carousel-theme'

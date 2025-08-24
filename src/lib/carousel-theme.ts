@@ -68,6 +68,6 @@ export const carouselThemes = {
 
 export type CarouselThemeKey = keyof typeof carouselThemes
 
-export function getCarouselTheme(color: string): typeof carouselThemes.teal {
+export function getCarouselTheme(color: string) {
   return carouselThemes[color as CarouselThemeKey] || carouselThemes.teal
 }

@@ -31,10 +31,10 @@ export function getImageProps<T extends Record<string, any>>(
 ): T & { unoptimized?: boolean; priority?: boolean } {
   // 브라우저 환경이 아니면 기본 props 반환
   if (typeof window === 'undefined') {
-    return baseProps
+    return baseProps as T & { unoptimized?: boolean; priority?: boolean }
   }
   
-  const result = { ...baseProps }
+  const result = { ...baseProps } as T & { unoptimized?: boolean; priority?: boolean }
   
   if (isGifImage(src)) {
     result.unoptimized = true

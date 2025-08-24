@@ -5,10 +5,10 @@ import { ContentBlock } from '@/lib/supabase'
 // GET: 제품의 콘텐츠 블록 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const { productId } = params
+    const { productId } = await params
 
     // UUID 형식 검증
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -50,10 +50,10 @@ export async function GET(
 // PUT: 제품의 콘텐츠 블록 업데이트
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
-    const { productId } = params
+    const { productId } = await params
     const body = await request.json()
     const { blocks } = body
 

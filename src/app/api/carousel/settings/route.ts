@@ -8,9 +8,9 @@ let carouselSettings = {
 }
 
 // 서버 시작 시 기본값 설정 (프로덕션에서는 데이터베이스에서 로드)
-if (typeof globalThis !== 'undefined' && !globalThis.__carouselSettingsInitialized) {
+if (typeof globalThis !== 'undefined' && !(globalThis as any).__carouselSettingsInitialized) {
   carouselSettings = { enabled: false }
-  globalThis.__carouselSettingsInitialized = true
+  ;(globalThis as any).__carouselSettingsInitialized = true
 }
 
 /**
