@@ -66,7 +66,7 @@ export function SiteBanner({ className = '' }: SiteBannerProps) {
                 width: 800,
                 height: 200,
                 className: "w-full h-48 object-cover"
-              })}
+              }, { priority: true })}
             />
             {/* 어두운 오버레이 */}
             <div className="absolute inset-0 bg-black bg-opacity-40"></div>

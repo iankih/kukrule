@@ -486,7 +486,7 @@ export default function HomePage() {
                                   width: 64,
                                   height: 64,
                                   className: "w-full h-full object-contain"
-                                })}
+                                }, { priority: index === 0 })}
                               />
                             ) : (
                               <span className="text-gray-400 text-sm">제품</span>
@@ -598,7 +598,7 @@ export default function HomePage() {
                                           width: 96,
                                           height: 128,
                                           className: "w-full h-full object-contain"
-                                        })}
+                                        }, { priority: index === 0 })}
                                       />
                                     ) : (
                                       <span className="text-sm text-gray-400">제품</span>
@@ -654,6 +654,7 @@ export default function HomePage() {
                       width={48}
                       height={48}
                       className="w-full h-full object-contain"
+                      priority
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-900">화장품</span>
@@ -677,6 +678,7 @@ export default function HomePage() {
                       width={48}
                       height={48}
                       className="w-full h-full object-contain"
+                      priority
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-900">가구</span>
@@ -700,6 +702,7 @@ export default function HomePage() {
                       width={48}
                       height={48}
                       className="w-full h-full object-contain"
+                      priority
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-900">생활가전</span>
@@ -871,7 +874,7 @@ export default function HomePage() {
                                 width: 64,
                                 height: 64,
                                 className: "w-full h-full object-contain"
-                              })}
+                              }, { priority: rank === 1 })}
                             />
                           ) : (
                             <span className="text-gray-400 text-sm">제품</span>
