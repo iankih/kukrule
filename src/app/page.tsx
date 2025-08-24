@@ -47,21 +47,24 @@ export default function HomePage() {
       title: '오직, 국룰에서만 만나볼 수 있어요\n특별한 국민 아이템',
       subtitle: '브랜드데이 특가',
       color: 'teal',
-      image: null
+      image: null,
+      link_url: null
     },
     {
       id: 2,
       title: '트렌드를 앞서가는\n뷰티 아이템 모음',
       subtitle: '신상품 출시',
       color: 'purple',
-      image: null
+      image: null,
+      link_url: null
     },
     {
       id: 3,
       title: '검증된 품질의\n베스트 셀러 상품',
       subtitle: '인기 상품 모음',
       color: 'orange',
-      image: null
+      image: null,
+      link_url: null
     }
   ])
 
@@ -564,14 +567,29 @@ export default function HomePage() {
                     >
                       {carouselItems.map((item, index) => {
                         const themeColors = getCarouselTheme(item.color)
+                        
+                        const handleCarouselClick = () => {
+                          if (item.link_url) {
+                            // 내부 링크인지 외부 링크인지 확인
+                            if (item.link_url.startsWith('/')) {
+                              // 내부 링크는 Next.js router로 네비게이션
+                              router.push(item.link_url)
+                            } else {
+                              // 외부 링크는 새 탭에서 열기
+                              window.open(item.link_url, '_blank', 'noopener,noreferrer')
+                            }
+                          }
+                        }
+                        
                         return (
                           <div key={index} className="w-full flex-shrink-0">
                             <div 
-                              className="p-8"
+                              className={`p-8 ${item.link_url ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
                               style={{ 
                                 background: themeColors.gradient,
                                 borderRadius: '16px'
                               }}
+                              onClick={handleCarouselClick}
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex-1">

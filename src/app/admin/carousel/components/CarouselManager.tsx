@@ -14,6 +14,7 @@ interface CarouselItem {
   subtitle: string
   color: string
   image: string | null
+  link_url?: string | null
   order?: number
   is_active?: boolean
 }
@@ -80,7 +81,15 @@ export default function CarouselManager() {
     const loadCarouselData = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('/api/carousel')
+        const credentials = btoa(`${process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'}:${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'kukrule2025!'}`)
+        
+        // 관리자 모드로 모든 아이템 조회
+        const response = await fetch('/api/carousel?admin=true', {
+          headers: {
+            'Authorization': `Basic ${credentials}`
+          }
+        })
+        
         if (response.ok) {
           const data = await response.json()
           if (data.success && data.data.length > 0) {
@@ -241,6 +250,58 @@ export default function CarouselManager() {
     )
   }
 
+  const handleLinkChange = (itemId: number, link_url: string) => {
+    setCarouselItems(prev => 
+      prev.map(item => 
+        item.id === itemId 
+          ? { ...item, link_url: link_url || null }
+          : item
+      )
+    )
+  }
+
+  const handleToggleActive = (itemId: number) => {
+    setCarouselItems(prev => 
+      prev.map(item => 
+        item.id === itemId 
+          ? { ...item, is_active: !item.is_active }
+          : item
+      )
+    )
+  }
+
+  const addNewCarouselItem = () => {
+    if (carouselItems.length >= 5) {
+      alert('캐러셀 아이템은 최대 5개까지 생성할 수 있습니다.')
+      return
+    }
+    
+    const newId = Math.max(...carouselItems.map(item => item.id)) + 1
+    const newItem: CarouselItem = {
+      id: newId,
+      title: '새로운 캐러셀 제목\n부제목을 입력하세요',
+      subtitle: '새로운 부제목',
+      color: 'teal',
+      image: null,
+      link_url: null,
+      order: carouselItems.length + 1,
+      is_active: false
+    }
+    
+    setCarouselItems(prev => [...prev, newItem])
+  }
+
+  const removeCarouselItem = (itemId: number) => {
+    if (carouselItems.length <= 2) {
+      alert('캐러셀 아이템은 최소 2개 이상이어야 합니다.')
+      return
+    }
+    
+    if (confirm('이 캐러셀 아이템을 삭제하시겠습니까?')) {
+      setCarouselItems(prev => prev.filter(item => item.id !== itemId))
+    }
+  }
+
   // 캐러셀 토글 핸들러
   const handleToggleCarousel = async () => {
     try {
@@ -303,8 +364,7 @@ export default function CarouselManager() {
         body: JSON.stringify({
           items: carouselItems.map((item, index) => ({
             ...item,
-            order: index + 1,
-            is_active: true
+            order: index + 1
           }))
         })
       })
@@ -394,8 +454,21 @@ export default function CarouselManager() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">캐러셀 항목 관리</h2>
-          <p className="text-gray-600">홈페이지에 표시되는 3개의 캐러셀 항목을 관리할 수 있습니다.</p>
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">캐러셀 항목 관리</h2>
+              <p className="text-gray-600">홈페이지에 표시되는 캐러셀 항목을 관리할 수 있습니다. (최소 2개, 최대 5개)</p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={addNewCarouselItem}
+              disabled={carouselItems.length >= 5}
+              className="ml-4"
+            >
+              + 캐러셀 추가
+            </Button>
+          </div>
           
           {!carouselEnabled && (
             <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -461,12 +534,39 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div 
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: getCarouselTheme(item.color).primary }}
-                      ></div>
-                      <h3 className="text-lg font-semibold text-gray-900">캐러셀 {item.id}</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: getCarouselTheme(item.color).primary }}
+                        ></div>
+                        <h3 className="text-lg font-semibold text-gray-900">캐러셀 {item.id}</h3>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-500">활성화:</span>
+                          <button
+                            onClick={() => handleToggleActive(item.id)}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                              item.is_active ? 'bg-[#2D5F3F]' : 'bg-gray-300'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                item.is_active ? 'translate-x-5' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                      {carouselItems.length > 2 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCarouselItem(item.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                        >
+                          삭제
+                        </Button>
+                      )}
                     </div>
                     
                     <div className="space-y-4">
@@ -494,6 +594,22 @@ INSERT INTO carousel_items (id, title, subtitle, color, image, "order", is_activ
                           onChange={(e) => handleSubtitleChange(item.id, e.target.value)}
                           placeholder="캐러셀 부제목을 입력하세요"
                         />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          링크 URL (선택사항)
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
+                          value={item.link_url || ''}
+                          onChange={(e) => handleLinkChange(item.id, e.target.value)}
+                          placeholder="/home (내부링크) 또는 https://example.com (외부링크)"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          캐러셀 클릭 시 이동할 URL을 입력하세요. 비어있으면 클릭해도 이동하지 않습니다.
+                        </p>
                       </div>
                       
                       <div>

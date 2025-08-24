@@ -59,6 +59,20 @@ export interface SiteBanner {
   updated_at: string
 }
 
+// 캐러셀 아이템 타입
+export interface CarouselItem {
+  id: number
+  title: string
+  subtitle: string | null
+  color: string
+  image: string | null
+  link_url: string | null
+  order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 // 콘텐츠 블록 시스템
 export interface ContentBlock {
   id: string
