@@ -6,7 +6,13 @@ import { createClient } from '@supabase/supabase-js'
 // 관리자용 Supabase 클라이언트 (Service Role 사용)
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 )
 
 export async function GET(request: NextRequest) {
@@ -78,6 +84,25 @@ export async function POST(request: NextRequest) {
   try {
     console.log('POST /api/products - Starting product creation')
     
+    // 환경 변수 확인
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    
+    console.log('POST /api/products - Environment check:', {
+      hasServiceKey: !!serviceRoleKey,
+      serviceKeyLength: serviceRoleKey?.length,
+      hasUrl: !!supabaseUrl,
+      urlDomain: supabaseUrl?.split('://')[1]?.split('.')[0]
+    })
+    
+    if (!serviceRoleKey) {
+      console.error('POST /api/products - SUPABASE_SERVICE_ROLE_KEY not found!')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+    
     // 관리자 인증 확인
     await requireAdminAuth()
     console.log('POST /api/products - Admin auth passed')
@@ -85,7 +110,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('POST /api/products - Request body:', body)
     
-    const { title, description, category_id, manufacturer, price, thumbnail_url, images, coupang_link, naver_link } = body
+    const { title, description, category_id, manufacturer, price, thumbnail_url, images, mention_links, coupang_link, naver_link } = body
     
     // 필수 필드 검증
     if (!title || !category_id) {
@@ -103,11 +128,19 @@ export async function POST(request: NextRequest) {
       price: price ? parseFloat(price) : null,
       thumbnail_url,
       images: images || [],
+      mention_links: mention_links || [],
       coupang_link,
       naver_link
     }
     
     console.log('POST /api/products - Product data to insert:', productData)
+
+    // Service Role Key 테스트
+    const testResult = await adminSupabase.from('products').select('count', { count: 'exact', head: true })
+    console.log('POST /api/products - Service role test:', { 
+      error: testResult.error,
+      count: testResult.count 
+    })
 
     const { data, error } = await adminSupabase
       .from('products')
@@ -124,8 +157,18 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating product:', error)
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return NextResponse.json(
-        { error: 'Failed to create product' },
+        { 
+          error: 'Failed to create product',
+          details: error.message,
+          code: error.code
+        },
         { status: 500 }
       )
     }
